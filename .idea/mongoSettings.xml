@@ -4,7 +4,6 @@
     <option name="serverConfigurations">
       <list>
         <ServerConfiguration>
-          <option name="label" value="Security Manager" />
           <option name="serverUrls">
             <list>
               <option value="localhost:27017" />
@@ -13,7 +12,7 @@
           <option name="sshTunnelingConfiguration">
             <SshTunnelingConfiguration />
           </option>
-          <option name="userDatabase" value="security_manager" />
+          <option name="userDatabase" value="courtsystem" />
         </ServerConfiguration>
       </list>
     </option>

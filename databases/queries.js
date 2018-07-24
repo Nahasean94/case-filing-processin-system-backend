@@ -3,12 +3,22 @@
  */
 
 "use strict"
-const {Guard, Salary, Message, AttendanceRegister, Location, Admin,} = require('./schemas')//import various models
+const {Advocate,
+    Case,
+    Individual,
+    Organization,
+    DeputyRegistrar,
+    CourtStation,
+    CaseStation,
+    Verdict,
+    Transactions,
+    FeeStructure,
+    Form,} = require('./schemas')//import various models
 const mongoose = require('mongoose')//import mongoose library
 const bcrypt = require('bcrypt')//import bcrypt to assist hashing passwords
 //Connect to Mongodb
 
-mongoose.connect('mongodb://localhost/security_manager', {promiseLibrary: global.Promise})
+mongoose.connect('mongodb://localhost/courtsystem', {promiseLibrary: global.Promise})
 
 const queries = {
 
@@ -22,7 +32,7 @@ const queries = {
     },
     updateProfile: async function (id, profile) {
 
-        return await Guard.findOneAndUpdate({_id: id}, {
+        return await Advocate.findOneAndUpdate({_id: id}, {
             username: profile.username,
             email: profile.email,
 
@@ -38,71 +48,24 @@ const queries = {
             date_joined: new Date()
         }).save()
     },
-    registerGuardPersonalDetails: async function (userInfo) {
-        return await new Guard({
-            guard_id: userInfo.guard_id,
+    registerAdvocate: async function (userInfo) {
+        return await new Advocate({
+            practice_number: userInfo.practice_number,
             surname: userInfo.surname,
             first_name: userInfo.first_name,
             last_name: userInfo.last_name,
             dob: userInfo.dob,
             gender: userInfo.gender,
-            nationalID: userInfo.nationalID,
-            employment_date: userInfo.employment_date,
             password: bcrypt.hashSync(userInfo.password, 10),
             email: userInfo.email,
             profile_picture: 'default.jpg',
-            date_joined: new Date()
+            timestamp: new Date()
         }).save()
     },
-    /**
-     *
-     * Tag.findOneAndUpdate({
-                    name: tag
-                }, {$push: {podcasts: podcast._id}},{upsert:true}).exec()
-     })
-     */
-    registerGuard: async function (userInfo) {
-        return await new Guard({
-            guard_id: userInfo.guard_id,
-            email: userInfo.email,
-            surname: userInfo.surname,
-            first_name: userInfo.first_name,
-            last_name: userInfo.last_name,
-            password: bcrypt.hashSync(userInfo.password, 10),
-            dob: userInfo.dob,
-            gender: userInfo.gender,
-            nationalID: userInfo.nationalID,
-            profile_picture: 'default.jpg',
-            postal_address: userInfo.postal_address,
-            cellphone: userInfo.cellphone,
-            location: userInfo.location,
-            timestamp: new Date(),
-            employment_date: userInfo.employment_date,
-        }).save().then(guard => {
-            new Salary({
-                guard_id: guard.guard_id,
-                contract: userInfo.contract,
-                gross_salary: userInfo.gross,
-                deductions: [{
-                    name: 'nssf',
-                    amount: userInfo.nssf
-                }, {
-                    name: 'nhif',
-                    amount: userInfo.nhif
-                }, {
-                    name: 'loans',
-                    amount: userInfo.loans
-                }, {
-                    name: 'others',
-                    amount: userInfo.others
-                },]
-            }).save()
-            return guard
-        })
-    },
-    updateGuardBasicInfo: async function (userInfo) {
-        return await Guard.findByIdAndUpdate(userInfo.id,{
-            guard_id: userInfo.guard_id,
+
+    updateAdvocateBasicInfo: async function (userInfo) {
+        return await Advocate.findByIdAndUpdate(userInfo.id,{
+            practice_number: userInfo.practice_number,
             surname: userInfo.surname,
             first_name: userInfo.first_name,
             last_name: userInfo.last_name,
@@ -113,8 +76,8 @@ const queries = {
         },{new:true}).exec()
 
     },
-    updateGuardContactInfo: async function (userInfo) {
-        return await Guard.findByIdAndUpdate(userInfo.id,{
+    updateAdvocateContactInfo: async function (userInfo) {
+        return await Advocate.findByIdAndUpdate(userInfo.id,{
             email: userInfo.email,
             cellphone: userInfo.cellphone,
             postal_address: userInfo.postal_address,
@@ -133,28 +96,28 @@ const queries = {
         }).exec()
     },
     getPassword: async function (guard) {
-        return await Guard.findById(guard).select('password').exec()
+        return await Advocate.findById(guard).select('password').exec()
     },
     changePassword: async function (userInfo) {
-        return await Guard.findByIdAndUpdate(userInfo.guard,{ password: bcrypt.hashSync(userInfo.password, 10),},{new:true}).exec()
+        return await Advocate.findByIdAndUpdate(userInfo.guard,{ password: bcrypt.hashSync(userInfo.password, 10),},{new:true}).exec()
     },
     signin: async function (register) {
         return await new AttendanceRegister({
-            guard_id: register.guard_id,
+            practice_number: register.practice_number,
             signin: register.signin,
             date: register.date,
         }).save()
     },
     signout: async function (register) {
         const attendance = await AttendanceRegister.findOneAndUpdate({
-            guard_id: register.guard_id,
+            practice_number: register.practice_number,
             date: register.date,
         }, {
             signout: register.signout
         }, {new: true}).exec()
 
         //todo do calculations for hourly rates
-        const salary = await Salary.findOne({guard_id: register.guard_id}).exec()
+        const salary = await Salary.findOne({practice_number: register.practice_number}).exec()
         if (salary.contract === 'day') {
             let total_ductions=0
             salary.deductions.map(salo=>{
@@ -167,7 +130,7 @@ const queries = {
             // const body=
 
 
-            const message = `Guard ID: ${register.guard_id}, Salary for the day: KES ${salary.gross_salary}`
+            const message = `Advocate ID: ${register.practice_number}, Salary for the day: KES ${salary.gross_salary}`
             client.messages
                 .create({
                     body: message,
@@ -182,7 +145,7 @@ const queries = {
         return attendance
     },
     storeProfilePicture: async function (path,guard) {
-        return await Guard.findByIdAndUpdate(guard, {profile_picture: path},{new:true}).exec()
+        return await Advocate.findByIdAndUpdate(guard, {profile_picture: path},{new:true}).exec()
     },
     newMessage: async function (message) {
         return await new Message({
@@ -217,8 +180,8 @@ const queries = {
             },
         },{new:true}).exec()
     },
-    findGuardsInLocation: async function (location_id) {
-        return await Guard.find({location: location_id}).exec()
+    findAdvocatesInLocation: async function (location_id) {
+        return await Advocate.find({location: location_id}).exec()
     },
     findAllLocations: async function () {
         return await Location.find().exec()
@@ -227,35 +190,28 @@ const queries = {
         return await Location.findById(id).exec()
     },
 
-    findAllGuards: async function () {
-        return await Guard.find({}).exec()
+    findAllAdvocates: async function () {
+        return await Advocate.find({}).exec()
     },
-    findGuard: async function (args) {
-        return await Guard.findById(args.id).exec()
+    findAdvocate: async function (args) {
+        return await Advocate.findById(args.id).exec()
     },
-    findGuardByGuardId: async function (guard_id) {
-        return await Guard.findOne({guard_id: guard_id}).exec()
+    findAdvocateByAdvocateId: async function (practice_number) {
+        return await Advocate.findOne({practice_number: practice_number}).exec()
     },
-    isGuardExists: async function (args) {
-        return await Guard.findOne({email: args.email}).exec()
+    isAdvocateExists: async function (args) {
+        return await Advocate.findOne({practice_number: args.practice_number}).exec()
     },
-    // newReport: async function (report) {
-    //     return await new Report({
-    //         guard_id: report.guard_id,
-    //         report: report.report,
-    //         timestamp: new Date(),
-    //     }).save()
-    // },
-    getInbox: async function (guard_id) {
+    getInbox: async function (practice_number) {
         return await Message.find({
-            "author.id": guard_id,
+            "author.id": practice_number,
         }).sort({timestamp: -1}).exec()
     },
     getAllInbox: async function () {
         return await Message.find({}).sort({timestamp: -1}).exec()
     },
-    getAllGuards: async function () {
-        return await Guard.find({}).sort({timestamp: -1}).exec()
+    getAllAdvocates: async function () {
+        return await Advocate.find({}).sort({timestamp: -1}).exec()
     },
     getAllLocations: async function () {
         return await Location.find({}).sort({timestamp: -1}).exec()
@@ -264,20 +220,20 @@ const queries = {
     getMessage: async function (id) {
         return await Message.findById(id).sort({"replies.timestamp":-1}).exec()
     },
-    getGuardAttendance: async function (guard_id) {
-        return await AttendanceRegister.find({guard_id:guard_id}).sort({date:-1}).exec()
+    getAdvocateAttendance: async function (practice_number) {
+        return await AttendanceRegister.find({practice_number:practice_number}).sort({date:-1}).exec()
     },
-    getAllGuardsAttendance: async function () {
+    getAllAdvocatesAttendance: async function () {
         return await AttendanceRegister.find({}).sort({date:-1}).exec()
     },
-    getGuardInfo: async function (guard_id) {
-        return await Guard.findOne({guard_id:guard_id}).exec()
+    getAdvocateInfo: async function (practice_number) {
+        return await Advocate.findOne({practice_number:practice_number}).exec()
     },
-    getGuardContactInfo: async function (guard_id) {
-        return await Guard.findOne({guard_id:guard_id}).exec()
+    getAdvocateContactInfo: async function (practice_number) {
+        return await Advocate.findOne({practice_number:practice_number}).exec()
     },
-    getGuardPaymentInfo: async function (guard_id) {
-        return await Salary.findOne({guard_id:guard_id}).exec()
+    getAdvocatePaymentInfo: async function (practice_number) {
+        return await Salary.findOne({practice_number:practice_number}).exec()
     },
     isLocationExists: async function (args) {
         return await Location.findOne({name: args.name}).exec()

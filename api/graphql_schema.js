@@ -64,30 +64,21 @@ const AdminType = new GraphQLObjectType({
         date_joined: {type: GraphQLString},
     })
 })
-const GuardType = new GraphQLObjectType({
-    name: 'Guard',
+const AdvocateType = new GraphQLObjectType({
+    name: 'Advocate',
     fields: () => ({
         id: {type: GraphQLID},
         surname: {type: GraphQLString},
         email: {type: GraphQLString},
         profile_picture: {type: GraphQLString},
         timestamp: {type: GraphQLString},
-        guard_id: {type: GraphQLInt},
+        practice_number: {type: GraphQLInt},
         first_name: {type: GraphQLString},
         last_name: {type: GraphQLString},
         dob: {type: GraphQLString},
         gender: {type: GraphQLString},
         password: {type: GraphQLString},
-        postal_address: {type: GraphQLString},
         cellphone: {type: GraphQLLong},
-        nationalID: {type: GraphQLInt},
-        employment_date: {type: GraphQLString},
-        location: {
-            type: LocationType,
-            async resolve(parent, args) {
-                return await queries.findLocation(parent.location)
-            }
-        },
     })
 })
 const LocationType = new GraphQLObjectType({
@@ -102,7 +93,7 @@ const SalaryType = new GraphQLObjectType({
     name: 'Salary',
     fields: () => ({
         id: {type: GraphQLID},
-        guard_id: {type: GraphQLInt},
+        practice_number: {type: GraphQLInt},
         contract: {type: GraphQLString},
         deductions: {type: new GraphQLList(DeductionsType)},
         transactions: {type: new GraphQLList(TransactionsType)},
@@ -140,7 +131,7 @@ const MessageType = new GraphQLObjectType({
             type: AuthorType,
             async resolve(parent, args) {
                 if (parent.author.account === 'guard') {
-                    return await queries.findGuardByGuardId(parent.author.id).then(guard => {
+                    return await queries.findAdvocateByAdvocateId(parent.author.id).then(guard => {
                         return {
                             username: `${guard.first_name} ${guard.last_name}`,
                             profile_picture: guard.profile_picture
@@ -168,10 +159,10 @@ const MessageType = new GraphQLObjectType({
 //     name: 'Report',
 //     fields: () => ({
 //         id: {type: GraphQLID},
-//         guard_id: {
-//             type: GuardType,
+//         practice_number: {
+//             type: AdvocateType,
 //             async resolve(parent, args) {
-//                 return await queries.findGuardByGuardId(parent.guard_id)
+//                 return await queries.findAdvocateByAdvocateId(parent.practice_number)
 //             }
 //         },
 //         report: {type: GraphQLString},
@@ -186,7 +177,7 @@ const MessageReplies = new GraphQLObjectType({
             type: AuthorType,
             async resolve(parent, args) {
                 if (parent.author.account === 'guard') {
-                    return await queries.findGuardByGuardId(parent.author.id).then(guard => {
+                    return await queries.findAdvocateByAdvocateId(parent.author.id).then(guard => {
                         return {
                             username: `${guard.first_name} ${guard.last_name}`,
                             profile_picture: guard.profile_picture
@@ -217,7 +208,7 @@ const AttendanceRegister = new GraphQLObjectType({
     name: 'Comment',
     fields: () => ({
         id: {type: GraphQLID},
-        guard_id: {type: GraphQLInt},
+        practice_number: {type: GraphQLInt},
         signin: {type: GraphQLString},
         signout: {type: GraphQLString},
         date: {type: GraphQLString},
@@ -266,18 +257,18 @@ const RootQuery = new GraphQLObjectType({
                 return queries.findAllLocations()
             }
         },
-        findGuardsInLocation: {
-            type: new GraphQLList(GuardType),
+        findAdvocatesInLocation: {
+            type: new GraphQLList(AdvocateType),
             args: {id: {type: GraphQLID}},
             async resolve(parent, args, ctx) {
-                return await queries.findGuardsInLocation(args.id)
+                return await queries.findAdvocatesInLocation(args.id)
             }
         },
         getInbox: {
             type: new GraphQLList(MessageType),
-            args: {guard_id: {type: GraphQLString}},
+            args: {practice_number: {type: GraphQLString}},
             resolve(parent, args) {
-                return queries.getInbox(args.guard_id)
+                return queries.getInbox(args.practice_number)
             }
         },
         getAllInbox: {
@@ -286,10 +277,10 @@ const RootQuery = new GraphQLObjectType({
                 return queries.getAllInbox()
             }
         },
-        getAllGuards: {
-            type: new GraphQLList(GuardType),
+        getAllAdvocates: {
+            type: new GraphQLList(AdvocateType),
             resolve(parent, args) {
-                return queries.getAllGuards()
+                return queries.getAllAdvocates()
             }
         },
         getAllLocations: {
@@ -305,38 +296,38 @@ const RootQuery = new GraphQLObjectType({
                 return queries.getMessage(args.id)
             }
         },
-        getGuardAttendance: {
+        getAdvocateAttendance: {
             type: new GraphQLList(AttendanceRegister),
-            args: {guard_id: {type: GraphQLString}},
+            args: {practice_number: {type: GraphQLString}},
             resolve(parent, args) {
-                return queries.getGuardAttendance(args.guard_id)
+                return queries.getAdvocateAttendance(args.practice_number)
             }
         },
-        getAllGuardsAttendance: {
+        getAllAdvocatesAttendance: {
             type: new GraphQLList(AttendanceRegister),
             resolve(parent, args) {
-                return queries.getAllGuardsAttendance()
+                return queries.getAllAdvocatesAttendance()
             }
         },
-        getGuardInfo: {
-            type: GuardType,
-            args: {guard_id: {type: GraphQLString}},
+        getAdvocateInfo: {
+            type: AdvocateType,
+            args: {practice_number: {type: GraphQLString}},
             resolve(parent, args) {
-                return queries.getGuardInfo(args.guard_id)
+                return queries.getAdvocateInfo(args.practice_number)
             }
         },
-        getGuardPaymentInfo: {
+        getAdvocatePaymentInfo: {
             type: SalaryType,
-            args: {guard_id: {type: GraphQLString}},
+            args: {practice_number: {type: GraphQLString}},
             resolve(parent, args) {
-                return queries.getGuardPaymentInfo(args.guard_id)
+                return queries.getAdvocatePaymentInfo(args.practice_number)
             }
         },
-        getGuardContactInfo: {
-            type: GuardType,
-            args: {guard_id: {type: GraphQLString}},
+        getAdvocateContactInfo: {
+            type: AdvocateType,
+            args: {practice_number: {type: GraphQLString}},
             resolve(parent, args) {
-                return queries.getGuardContactInfo(args.guard_id)
+                return queries.getAdvocateContactInfo(args.practice_number)
             }
         },
         confirmPassword: {
@@ -376,17 +367,26 @@ const Mutation = new GraphQLObjectType({
 
             }
         },
-        isUserExists: {
-            type: ExistsType,
+        advocateLogin: {
+            type: TokenType,
             args: {
-                email: {type: GraphQLString},
+                practice_number: {type: GraphQLInt},
+                password: {type: GraphQLString}
             },
             async resolve(parent, args, ctx) {
-                return await queries.isUserExists(args).then(person => {
+                return await authentication.advocateLogin(args)
+
+            }
+        },
+        isAdvocateExists: {
+            type: ExistsType,
+            args: {
+                practice_number: {type: GraphQLInt},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.isAdvocateExists(args).then(person => {
                     return {exists: !!person}
-
                 })
-
             }
         },
         isLocationExists: {
@@ -415,39 +415,28 @@ const Mutation = new GraphQLObjectType({
                 })
             }
         },
-        registerGuard: {
-            type: GuardType,
+        registerAdvocate: {
+            type: AdvocateType,
             args: {
-                guard_id: {type: GraphQLInt},
+                practice_number: {type: GraphQLInt},
                 surname: {type: GraphQLString},
                 first_name: {type: GraphQLString},
                 last_name: {type: GraphQLString},
                 dob: {type: GraphQLString},
                 gender: {type: GraphQLString},
-                nationalID: {type: GraphQLInt},
-                employment_date: {type: GraphQLString},
                 password: {type: GraphQLString},
                 email: {type: GraphQLString},
                 cellphone: {type: GraphQLLong},
-                postal_address: {type: GraphQLString},
-                location: {type: GraphQLID},
-                contract: {type: GraphQLString},
-                gross: {type: GraphQLInt},
-                paye: {type: GraphQLInt},
-                nssf: {type: GraphQLInt},
-                nhif: {type: GraphQLInt},
-                loans: {type: GraphQLInt},
-                others: {type: GraphQLInt},
             },
             async resolve(parent, args, ctx) {
-                return await queries.registerGuard(args)
+                return await queries.registerAdvocate(args)
             }
         },
-        updateGuardBasicInfo: {
-            type: GuardType,
+        updateAdvocateBasicInfo: {
+            type: AdvocateType,
             args: {
                 id: {type: GraphQLID},
-                guard_id: {type: GraphQLString},
+                practice_number: {type: GraphQLString},
                 surname: {type: GraphQLString},
                 first_name: {type: GraphQLString},
                 last_name: {type: GraphQLString},
@@ -457,11 +446,11 @@ const Mutation = new GraphQLObjectType({
                 employment_date: {type: GraphQLString}
             },
             async resolve(parent, args, ctx) {
-                return await queries.updateGuardBasicInfo(args)
+                return await queries.updateAdvocateBasicInfo(args)
             }
         },
-        updateGuardContactInfo: {
-            type: GuardType,
+        updateAdvocateContactInfo: {
+            type: AdvocateType,
             args: {
                 id: {type: GraphQLID},
                 email: {type: GraphQLString},
@@ -469,7 +458,7 @@ const Mutation = new GraphQLObjectType({
                 postal_address: {type: GraphQLString},
             },
             async resolve(parent, args, ctx) {
-                return await queries.updateGuardContactInfo(args)
+                return await queries.updateAdvocateContactInfo(args)
             }
         },
         addLocation: {
@@ -495,7 +484,7 @@ const Mutation = new GraphQLObjectType({
         },
 
         uploadProfilePicture: {
-            type: GuardType,
+            type: AdvocateType,
             args: {
                 guard: {type: GraphQLID},
                 file: {type: GraphQLUpload},
@@ -508,7 +497,7 @@ const Mutation = new GraphQLObjectType({
         signin: {
             type: AttendanceRegister,
             args: {
-                guard_id: {type: GraphQLInt},
+                practice_number: {type: GraphQLInt},
                 signin: {type: GraphQLString},
                 date: {type: GraphQLString},
             },
@@ -520,7 +509,7 @@ const Mutation = new GraphQLObjectType({
         signout: {
             type: AttendanceRegister,
             args: {
-                guard_id: {type: GraphQLInt},
+                practice_number: {type: GraphQLInt},
                 signout: {type: GraphQLString},
                 date: {type: GraphQLString},
             },

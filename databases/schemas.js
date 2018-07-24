@@ -32,13 +32,13 @@ const CaseSchema = new Schema({
         party_id: String
 
     },
-    judge:  String,
+    judge: String,
     verdict: String,
     payment: String,
     timestamp: Date,
 })
 const AdvocateSchema = new Schema({
-    practice_number: String,
+    practice_number: Number,
     email: {
         type: String,
         unique: [true, "email already exists"],
@@ -67,7 +67,6 @@ const AdvocateSchema = new Schema({
         required: [true, 'gender is a required field']
     },
     profile_picture: String,
-    postal_address: String,
     cellphone: Number,
     timestamp: Date,
 })
@@ -225,5 +224,15 @@ const Form = mongoose.model('Form', FormSchema)
 
 //export the above models to used in other files
 module.exports = {
-    Advocate, Salary, Message, AttendanceRegister, Location, Admin
+    Advocate,
+    Case,
+    Individual,
+    Organization,
+    DeputyRegistrar,
+    CourtStation,
+    CaseStation,
+    Verdict,
+    Transactions,
+    FeeStructure,
+    Form,
 }
