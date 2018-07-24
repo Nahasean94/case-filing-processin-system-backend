@@ -1,0 +1,17 @@
+doctype
+html
+    head
+        title comments
+        link(rel="stylesheet" href="/front-end/css/bootstrap.min.css")
+        link(rel="stylesheet" href="/front-end/font-awesome/css/font-awesome.min.css")
+        link(rel="stylesheet" href="/front-end/css/custom.css")
+    body
+        ul Your post has #{comments.length} comments
+            -if(comments.length>0){
+            -for(let i=0;i<comments.length;i++){
+            li comment by #{comments[i].author} #{comments[i].body}, comment at #{comments[i].timestamp}
+            -}
+            -}
+
+
+

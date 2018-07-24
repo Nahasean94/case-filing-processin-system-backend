@@ -1,0 +1,43 @@
+doctype html
+html
+    head
+        title Admin
+        link(rel="stylesheet" href="/front-end/css/bootstrap.min.css")
+        link(rel="stylesheet" href="/front-end/font-awesome/css/font-awesome.min.css")
+        link(rel="stylesheet" href="/front-end/css/custom.css")
+    body
+        div(class="container")
+            div(class="row")
+                div(class="col-sm-4")
+                    h3 Login
+                    form(action="/tp/admin/login", method="POST")
+                        div(class="form-group")
+                            label(for="mail") Email:
+                            input(class="form-control" name="email" id="mail" type="email" required="true")
+                        div(class="form-group")
+                            label(for="passwad") Password:
+                            input(class="form-control" name="password" id="passwad" type="password" required="true")
+                        div(class="form-group")
+                        button(type="submit" class="btn btn-small btn-primary") Login
+                div(class="col-sm-6 col-sm-offset-2")
+                    h3 Create a new account
+                    form(action="/tp/admin/signup", method="POST")
+                        div(class="form-group")
+                            label(for="email") Email:
+                            input(class="form-control" name="email" id="email" type="email" required="true")
+                        div(class="form-group")
+                            label(for="email2") Email 2:
+                            input(class="form-control" name="email2" id="email2" type="email" required="true")
+                        div(class="form-group")
+                            label(for="password") Password:
+                            input(class="form-control" name="password" id="password" type="password" required="true")
+                        div(class="form-group")
+                            label(for="confirm_password") Confirm Password:
+                            input(class="form-control" name="confirm_password" id="confirm_password" type="password" required="true")
+                        div(class="form-group")
+                            label(for="username") Username
+                            input(class="form-control" name="username" id="username" type="text" required="true")
+                        div(class="form-group")
+                            label(for="cellphone") Cellphone
+                            input(class="form-control" name="cellphone" id="cellphone" type="number" required="true")
+                        button(type="submit" class="btn btn-small btn-primary") Sign up

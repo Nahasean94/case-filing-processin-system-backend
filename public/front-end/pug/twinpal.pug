@@ -1,0 +1,29 @@
+doctype html
+html
+    head
+        title Practice
+        link(rel="stylesheet" href="/front-end/css/bootstrap.min.css")
+        link(rel="stylesheet" href="/front-end/font-awesome/css/font-awesome.min.css")
+        link(rel="stylesheet" href="/front-end/css/custom.css")
+    body
+        div(class="container")
+            div(class="row")
+                a(href="/logout" class="btn btn-warning btn-sm" role="button") Logout
+                ul
+                    li
+                        img(src='/uploads/' + profile.profile_picture width="200" height="200")
+                    li First name: #{profile.first_name}
+                    li Last name: #{profile.last_name}
+                    li
+                    - if(profile.twinpal_posts){
+                        ul Their posts
+                            -for(let i=0;i<profile.twinpal_posts.length;i++){
+                            li #{profile.twinpal_posts[i].body}
+                                ul(class="list-inline")
+                                    li Posted on: #{profile.twinpal_posts[i].timestamp.toDateString()}
+                                    li
+                                        a(href="/posts/like_post/"+profile.twinpal_posts[i]._id) like #{profile.twinpal_posts[i].likes.length}
+                                    li #{profile.twinpal_posts[i].shares} shares
+                                    li viewed by: #{profile.twinpal_posts[i].scope}
+                            -}
+                    -}

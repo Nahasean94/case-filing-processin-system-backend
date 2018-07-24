@@ -1,0 +1,24 @@
+doctype
+html
+    head
+        title Your uploads
+        link(rel="stylesheet" href="/front-end/css/bootstrap.min.css")
+        link(rel="stylesheet" href="/front-end/font-awesome/css/font-awesome.min.css")
+        link(rel="stylesheet" href="/front-end/css/custom.css")
+    body
+        div(class="container")
+            br
+            - if(uploads.length>0){
+            ul
+                -for(let i=0;i<uploads.length;i++){
+                -if((uploads[i].path).endsWith(".jpg")){
+                li
+                    img(src="/uploads/" + uploads[i].path width=400 height=200)
+                -}
+                - else if((uploads[i].path).endsWith(".mp4")){
+                li
+                    video(src="/uploads/" + uploads[i].path controls="on" width=400 height=200)
+                -}
+                a(href="/uploads/delete/"+uploads[i]._id) delete
+                -}
+            -}

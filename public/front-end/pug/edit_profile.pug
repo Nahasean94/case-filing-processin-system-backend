@@ -1,0 +1,35 @@
+doctype
+html
+    head
+        title Edit profile
+        link(rel="stylesheet" href="/front-end/css/bootstrap.min.css")
+        link(rel="stylesheet" href="/front-end/font-awesome/css/font-awesome.min.css")
+        link(rel="stylesheet" href="/front-end/css/custom.css")
+    body
+        div(class="container")
+            br
+            form(action="/profile/edit" method="post")
+                input(type="hidden" value=profile._id name="twinpal_id")
+                div(class="form-group")
+                    label(for="first_name") First name
+                    input(type="text" id="first_name" name="first_name" class="form-control" value=profile.first_name)
+                div(class="form-group")
+                    label(for="last_name") Last name
+                    input(type="text" id="last_name" name="last_name" class="form-control" value=profile.last_name)
+                div(class="form-group")
+                    label(for="username") Username (visible to others)
+                    input(type="text" id="username" name="username" class="form-control" value=profile.username)
+                div(class="form-group")
+                    label(for="email") Email
+                    input(type="email" id="email" name="email" class="form-control" value=profile.email)
+                div(class="form-group")
+                    label(for="cellphone") Phone number
+                    input(type="number" id="cellphone" name="cellphone" class="form-control" value=profile.cellphone)
+                div(class="form-group")
+                    label(for="dob") Date of birth(you can only change this once)
+                    input(type="date" id="dob" name="dob" class="form-control" value=profile.birthday.toDateString())
+                div(class="form-group")
+                    label(for="location") Location (country)
+                    input(type="text" id="location" name="location" class="form-control" value=profile.location)
+                div(class="form-group")
+                    input(type="submit" value="Update" class="form-control")

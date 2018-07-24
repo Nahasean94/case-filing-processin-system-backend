@@ -1,0 +1,43 @@
+doctype html
+html
+    head
+        title Sign up
+        link(rel="stylesheet" href="/front-end/css/bootstrap.min.css")
+        link(rel="stylesheet" href="/front-end/font-awesome/css/font-awesome.min.css")
+        link(rel="stylesheet" href="/front-end/css/custom.css")
+    body
+        div(class="container")
+            div(class="row")
+                div(class="col-sm-4")
+                    h3 Login
+                    form(action="/login", method="POST")
+                        div(class="form-group")
+                            label(for="mail") Email:
+                            input(class="form-control" name="email" id="mail" type="email" required="true")
+                        div(class="form-group")
+                            label(for="passwad") Password:
+                            input(class="form-control" name="password" id="passwad" type="password" required="true")
+                        div(class="form-group")
+                        button(type="submit" class="btn btn-small btn-primary") Login
+                div(class="col-sm-6 col-sm-offset-2")
+                    h3 Create a free account
+                    form(action="/signup", method="POST")
+                        div(class="form-group")
+                            label(for="first_name") First name:
+                            input(class="form-control" name="first_name" id="first_name" type="text" required="true")
+                        div(class="form-group")
+                            label(for="last_name") Last name:
+                            input(class="form-control" name="last_name" id="last_name" type="text" required="true")
+                        div(class="form-group")
+                            label(for="email") Email:
+                            input(class="form-control" name="email" id="email" type="email" required="true")
+                        div(class="form-group")
+                            label(for="password") Password:
+                            input(class="form-control" name="password" id="password" type="password" required="true")
+                        div(class="form-group")
+                            label(for="confirm_password") Confirm Password:
+                            input(class="form-control" name="confirm_password" id="confirm_password" type="password" required="true")
+                        div(class="form-group")
+                            label(for="birthday") Date of Birth:
+                            input(class="form-control" name="birthday" id="birthday" type="date")
+                        button(type="submit" class="btn btn-small btn-primary") Sign up
