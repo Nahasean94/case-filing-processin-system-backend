@@ -117,7 +117,7 @@ const OrganizationSchema = new Schema({
     timestamp: Date,
     postal_address: String,
 })
-const DeputyRegistrarSchema = new Schema({
+const CourtStaffSchema = new Schema({
     username: {
         type: String,
         unique: [true, "username already exists"],
@@ -129,6 +129,18 @@ const DeputyRegistrarSchema = new Schema({
     role: {
         type: String,
         enum: ['assistant', 'registrar'],
+        required: [true, 'Password is a required field']
+    },
+    timestamp: Date,
+
+})
+const AdminSchema = new Schema({
+    username: {
+        type: String,
+        unique: [true, "username already exists"],
+    },
+    password: {
+        type: String,
         required: [true, 'Password is a required field']
     },
     timestamp: Date,
@@ -214,11 +226,12 @@ const Advocate = mongoose.model('Advocate', AdvocateSchema)
 const Case = mongoose.model('Case', CaseSchema)
 const Individual = mongoose.model('Individual', IndividualSchema)
 const Organization = mongoose.model('Organization', OrganizationSchema)
-const DeputyRegistrar = mongoose.model('DeputyRegistrar', DeputyRegistrarSchema)
+const CourtStaff = mongoose.model('CourtStaff', CourtStaffSchema)
 const CourtStation = mongoose.model('CourtStation', CourtStationSchema)
 const CaseStation = mongoose.model('CaseStation', CaseStationSchema)
 const Verdict = mongoose.model('Verdict', VerdictSchema)
 const Transactions = mongoose.model('Transactions', TransactionsSchema)
+const Admin = mongoose.model('Admin', AdminSchema)
 const FeeStructure = mongoose.model('FeeStructure', FeeStructureSchema)
 const Form = mongoose.model('Form', FormSchema)
 
@@ -228,11 +241,12 @@ module.exports = {
     Case,
     Individual,
     Organization,
-    DeputyRegistrar,
+    CourtStaff,
     CourtStation,
     CaseStation,
     Verdict,
     Transactions,
     FeeStructure,
     Form,
+    Admin
 }

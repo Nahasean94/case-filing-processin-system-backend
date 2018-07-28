@@ -7,10 +7,11 @@ const {Advocate,
     Case,
     Individual,
     Organization,
-    DeputyRegistrar,
+    CourtStaff,
     CourtStation,
     CaseStation,
     Verdict,
+    Admin,
     Transactions,
     FeeStructure,
     Form,} = require('./schemas')//import various models
@@ -39,6 +40,13 @@ const queries = {
         }).exec()
     },
 
+    registerAdmin: async function (userInfo) {
+        return await new Admin({
+            password: bcrypt.hashSync(userInfo.password, 10),
+            username: userInfo.username,
+            timestamp: new Date()
+        }).save()
+    },
     signup: async function (userInfo) {
         return await new Admin({
             password: bcrypt.hashSync(userInfo.password, 10),
@@ -89,6 +97,9 @@ const queries = {
             name: location.name,
             date_joined: new Date()
         }).save()
+    },
+    aadminExists: async function (location) {
+        return await Admin.find({}).exec()
     },
     updateLocation: async function (location) {
         return await Location.findByIdAndUpdate(location.id,{

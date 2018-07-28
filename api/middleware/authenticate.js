@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const config = require('../config')
-const {Advocate} = require('../../databases/schemas')
+const {Advocate,Admin} = require('../../databases/schemas')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
@@ -30,15 +30,14 @@ module.exports = {
         }
     },
     login: async (args) => {
-        const {email, password} = args
-        return await Advocate.findOne({email: email}).select('email password username').exec().then(function (person) {
+        const {username, password} = args
+        return await Admin.findOne({username: username}).select('username password').exec().then(function (person) {
             if (person) {
                 if (bcrypt.compareSync(password, person.password)) {
                     return {
                         ok: true,
                         token: jwt.sign({
                             id: person._id,
-                            email: person.email,
                             username: person.username,
                         }, config.jwtSecret),
                         error: null

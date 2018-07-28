@@ -16,7 +16,7 @@ const shortid = require('shortid')//will help us name each upload uniquely
 const jsmediatags = require('jsmediatags')
 
 //Store the upload
-const storeFS = ({stream,filename}, id, uploader) => {
+const storeFS = ({stream, filename}, id, uploader) => {
     const uploadDir = `./public/uploads/${uploader}`
 
 // Ensure upload directory exists
@@ -59,9 +59,7 @@ const AdminType = new GraphQLObjectType({
     fields: () => ({
         id: {type: GraphQLID},
         username: {type: GraphQLString},
-        email: {type: GraphQLString},
-        profile_picture: {type: GraphQLString},
-        date_joined: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
     })
 })
 const AdvocateType = new GraphQLObjectType({
@@ -245,91 +243,20 @@ const RootQuery = new GraphQLObjectType({
                 return queries.findUser({id: args.id})
             }
         },
-        people: {
-            type: new GraphQLList(AdminType),
-            resolve: () => {
-                return queries.findAllUsers()
-            }
-        },
-        locations: {
-            type: new GraphQLList(LocationType),
-            resolve: () => {
-                return queries.findAllLocations()
-            }
-        },
-        findAdvocatesInLocation: {
-            type: new GraphQLList(AdvocateType),
-            args: {id: {type: GraphQLID}},
-            async resolve(parent, args, ctx) {
-                return await queries.findAdvocatesInLocation(args.id)
-            }
-        },
-        getInbox: {
-            type: new GraphQLList(MessageType),
-            args: {practice_number: {type: GraphQLString}},
+        adminExists: {
+            type: ExistsType,
             resolve(parent, args) {
-                return queries.getInbox(args.practice_number)
+                return queries.aadminExists().then(admin => {
+                    if (admin.length > 0) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
             }
         },
-        getAllInbox: {
-            type: new GraphQLList(MessageType),
-            resolve(parent, args) {
-                return queries.getAllInbox()
-            }
-        },
-        getAllAdvocates: {
-            type: new GraphQLList(AdvocateType),
-            resolve(parent, args) {
-                return queries.getAllAdvocates()
-            }
-        },
-        getAllLocations: {
-            type: new GraphQLList(LocationType),
-            resolve(parent, args) {
-                return queries.getAllLocations()
-            }
-        },
-        getMessage: {
-            type: MessageType,
-            args: {id: {type: GraphQLID}},
-            resolve(parent, args) {
-                return queries.getMessage(args.id)
-            }
-        },
-        getAdvocateAttendance: {
-            type: new GraphQLList(AttendanceRegister),
-            args: {practice_number: {type: GraphQLString}},
-            resolve(parent, args) {
-                return queries.getAdvocateAttendance(args.practice_number)
-            }
-        },
-        getAllAdvocatesAttendance: {
-            type: new GraphQLList(AttendanceRegister),
-            resolve(parent, args) {
-                return queries.getAllAdvocatesAttendance()
-            }
-        },
-        getAdvocateInfo: {
-            type: AdvocateType,
-            args: {practice_number: {type: GraphQLString}},
-            resolve(parent, args) {
-                return queries.getAdvocateInfo(args.practice_number)
-            }
-        },
-        getAdvocatePaymentInfo: {
-            type: SalaryType,
-            args: {practice_number: {type: GraphQLString}},
-            resolve(parent, args) {
-                return queries.getAdvocatePaymentInfo(args.practice_number)
-            }
-        },
-        getAdvocateContactInfo: {
-            type: AdvocateType,
-            args: {practice_number: {type: GraphQLString}},
-            resolve(parent, args) {
-                return queries.getAdvocateContactInfo(args.practice_number)
-            }
-        },
+
         confirmPassword: {
             type: PasswordType,
             args: {
@@ -357,7 +284,7 @@ const Mutation = new GraphQLObjectType({
         login: {
             type: TokenType,
             args: {
-                email: {type: GraphQLString},
+                username: {type: GraphQLString},
                 password: {type: GraphQLString}
             },
             async resolve(parent, args, ctx) {
@@ -389,30 +316,16 @@ const Mutation = new GraphQLObjectType({
                 })
             }
         },
-        isLocationExists: {
-            type: ExistsType,
-            args: {
-                name: {type: GraphQLString},
-            },
-            async resolve(parent, args, ctx) {
-                return await queries.isLocationExists(args).then(location => {
-                    return {exists: !!location}
 
-                })
 
-            }
-        },
-        signup: {
+        registerAdmin: {
             type: AdminType,
             args: {
                 username: {type: GraphQLString},
-                email: {type: GraphQLString},
                 password: {type: GraphQLString},
             },
             async resolve(parent, args, ctx) {
-                return await queries.signup(args).then(person => {
-                    return person
-                })
+                return await queries.registerAdmin(args)
             }
         },
         registerAdvocate: {
