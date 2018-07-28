@@ -39,6 +39,7 @@ module.exports = {
                         token: jwt.sign({
                             id: person._id,
                             username: person.username,
+                            role: 'system',
                         }, config.jwtSecret),
                         error: null
                     }
@@ -73,6 +74,7 @@ module.exports = {
                             id: person._id,
                             practice_number: person.practice_number,
                             surname: person.surname,
+                            role: 'advocate',
                         }, config.jwtSecret),
                         error: null
                     }

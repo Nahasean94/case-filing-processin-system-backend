@@ -92,15 +92,16 @@ const queries = {
         },{new:true}).exec()
 
     },
-    addLocation: async function (location) {
-        return await new Location({
+    addCourtStation: async function (location) {
+        return await new CourtStation({
             name: location.name,
-            date_joined: new Date()
+            timestamp: new Date()
         }).save()
     },
-    aadminExists: async function (location) {
+    adminExists: async function (location) {
         return await Admin.find({}).exec()
     },
+
     updateLocation: async function (location) {
         return await Location.findByIdAndUpdate(location.id,{
             name: location.name,
@@ -246,8 +247,11 @@ const queries = {
     getAdvocatePaymentInfo: async function (practice_number) {
         return await Salary.findOne({practice_number:practice_number}).exec()
     },
-    isLocationExists: async function (args) {
-        return await Location.findOne({name: args.name}).exec()
+    isCourtStationExists: async function (args) {
+        return await CourtStation.find({name: args.name}).exec()
+    },
+    courtStations: async function (args) {
+        return await CourtStation.find({}).exec()
     },
 }
 module.exports = queries

@@ -79,8 +79,8 @@ const AdvocateType = new GraphQLObjectType({
         cellphone: {type: GraphQLLong},
     })
 })
-const LocationType = new GraphQLObjectType({
-    name: 'Location',
+const CourtStationType = new GraphQLObjectType({
+    name: 'CourtStation',
     fields: () => ({
         id: {type: GraphQLID},
         name: {type: GraphQLString},
@@ -246,7 +246,7 @@ const RootQuery = new GraphQLObjectType({
         adminExists: {
             type: ExistsType,
             resolve(parent, args) {
-                return queries.aadminExists().then(admin => {
+                return queries.adminExists().then(admin => {
                     if (admin.length > 0) {
                         return {exists: true}
                     }
@@ -254,6 +254,26 @@ const RootQuery = new GraphQLObjectType({
                         exists: false
                     }
                 })
+            }
+        },
+        isCourtStationExists: {
+            type: ExistsType,
+            args:{name:{type:GraphQLString}},
+            resolve(parent, args) {
+                return queries.isCourtStationExists(args).then(location => {
+                    if (location.length > 0) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
+            }
+        },
+        courtStations: {
+            type:new GraphQLList(CourtStationType),
+            resolve(parent, args) {
+                return queries.courtStations()
             }
         },
 
@@ -374,25 +394,23 @@ const Mutation = new GraphQLObjectType({
                 return await queries.updateAdvocateContactInfo(args)
             }
         },
-        addLocation: {
-            type: LocationType,
+        addCourtStation: {
+            type: CourtStationType,
             args: {
                 name: {type: GraphQLString},
             },
             async resolve(parent, args, ctx) {
-                return await queries.addLocation(args).then(location => {
-                    return location
-                })
+                return await queries.addCourtStation(args)
             }
         },
-        updateLocation: {
-            type: LocationType,
+        updateCourtStation: {
+            type: CourtStationType,
             args: {
                 id: {type: GraphQLID},
                 name: {type: GraphQLString},
             },
             async resolve(parent, args, ctx) {
-                return await queries.updateLocation(args)
+                return await queries.updateCourtStation(args)
             }
         },
 
