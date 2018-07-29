@@ -68,10 +68,11 @@ const CourtStaffSchema = new GraphQLObjectType({
         id: {type: GraphQLID},
         username: {type: GraphQLString},
         role: {type: GraphQLString},
-        court_station: {type: CourtStationType,
-       async resolve(parent){
-            return await queries.findCourtStation(parent.court_station)
-        }
+        court_station: {
+            type: CourtStationType,
+            async resolve(parent) {
+                return await queries.findCourtStation(parent.court_station)
+            }
         },
         timestamp: {type: GraphQLString},
     })
@@ -101,7 +102,7 @@ const CourtStationType = new GraphQLObjectType({
         timestamp: {type: GraphQLString},
     })
 })
-const CaseCategoryType= new GraphQLObjectType({
+const CaseCategoryType = new GraphQLObjectType({
     name: 'CaseCategory',
     fields: () => ({
         id: {type: GraphQLID},
@@ -110,7 +111,7 @@ const CaseCategoryType= new GraphQLObjectType({
     })
 })
 
-const FormFeeStructureSchema= new GraphQLObjectType({
+const FormFeeStructureSchema = new GraphQLObjectType({
     name: 'FormFeeStructure',
     fields: () => ({
         id: {type: GraphQLID},
@@ -173,7 +174,7 @@ const RootQuery = new GraphQLObjectType({
         },
         isCourtStationExists: {
             type: ExistsType,
-            args:{name:{type:GraphQLString}},
+            args: {name: {type: GraphQLString}},
             resolve(parent, args) {
                 return queries.isCourtStationExists(args).then(court_station => {
                     if (court_station.length > 0) {
@@ -187,7 +188,7 @@ const RootQuery = new GraphQLObjectType({
         },
         isCourtAdminExists: {
             type: ExistsType,
-            args:{court_station:{type:GraphQLID}},
+            args: {court_station: {type: GraphQLID}},
             resolve(parent, args) {
                 return queries.isCourtAdminExists(args).then(court_station => {
                     if (court_station) {
@@ -199,22 +200,50 @@ const RootQuery = new GraphQLObjectType({
                 })
             }
         },
+        isDeputyRegistrarExists: {
+            type: ExistsType,
+            args: {court_station: {type: GraphQLID}},
+            resolve(parent, args) {
+                return queries.isDeputyRegistrarExists(args).then(court_station => {
+                    if (court_station) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
+            }
+        },
+        isCourtAssistantExists: {
+            type: ExistsType,
+            args: {court_station: {type: GraphQLID}},
+            resolve(parent, args) {
+                return queries.isCourtAssistantExists(args).then(court_station => {
+                    if (court_station) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
+            }
+        },
         courtStations: {
-            type:new GraphQLList(CourtStationType),
+            type: new GraphQLList(CourtStationType),
             resolve(parent, args) {
                 return queries.courtStations()
             }
         },
 
         formFeeStructures: {
-            type:new GraphQLList(FormFeeStructureSchema),
+            type: new GraphQLList(FormFeeStructureSchema),
             resolve(parent, args) {
                 return queries.formFeeStructures()
             }
         },
         isFormFeeStructureExists: {
             type: ExistsType,
-            args:{name:{type:GraphQLString}},
+            args: {name: {type: GraphQLString}},
             resolve(parent, args) {
                 return queries.isFormFeeStructureExists(args).then(court_station => {
                     if (court_station.length > 0) {
@@ -226,9 +255,9 @@ const RootQuery = new GraphQLObjectType({
                 })
             }
         },
- isCaseCategoryExists: {
+        isCaseCategoryExists: {
             type: ExistsType,
-            args:{name:{type:GraphQLString}},
+            args: {name: {type: GraphQLString}},
             resolve(parent, args) {
                 return queries.isCaseCategoryExists(args).then(court_station => {
                     if (court_station.length > 0) {
@@ -253,9 +282,18 @@ const RootQuery = new GraphQLObjectType({
         },
 
         caseCategories: {
-            type:new GraphQLList(CaseCategoryType),
+            type: new GraphQLList(CaseCategoryType),
             resolve(parent, args) {
                 return queries.caseCategories()
+            }
+        },
+        getCourtAssistant: {
+            type: CourtStaffSchema,
+            args: {
+                court_station: {type: GraphQLID},
+            },
+            resolve(parent, args) {
+                return queries.getCourtAssistant(args.court_station)
             }
         },
 
@@ -319,6 +357,29 @@ const Mutation = new GraphQLObjectType({
             }
         },
 
+        deputyRegistrarLogin: {
+            type: TokenType,
+            args: {
+                username: {type: GraphQLString},
+                password: {type: GraphQLString},
+                court_station: {type: GraphQLID}
+            },
+            async resolve(parent, args, ctx) {
+                return await authentication.deputyRegistrarLogin(args)
+            }
+        },
+        isCourtAssistantLogin: {
+            type: TokenType,
+            args: {
+                username: {type: GraphQLString},
+                password: {type: GraphQLString},
+                court_station: {type: GraphQLID}
+            },
+            async resolve(parent, args, ctx) {
+                return await authentication.courtAssistantLogin(args)
+            }
+        },
+
 
         registerAdmin: {
             type: AdminType,
@@ -339,6 +400,28 @@ const Mutation = new GraphQLObjectType({
             },
             async resolve(parent, args, ctx) {
                 return await queries.registerCourtAdmin(args)
+            }
+        },
+        registerDeputyRegistrar: {
+            type: CourtStaffSchema,
+            args: {
+                username: {type: GraphQLString},
+                password: {type: GraphQLString},
+                court_station: {type: GraphQLID},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.registerDeputyRegistrar(args)
+            }
+        },
+        registerCourtAssistant: {
+            type: CourtStaffSchema,
+            args: {
+                username: {type: GraphQLString},
+                password: {type: GraphQLString},
+                court_station: {type: GraphQLID},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.registerCourtAssistant(args)
             }
         },
         registerAdvocate: {

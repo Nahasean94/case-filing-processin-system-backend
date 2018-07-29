@@ -58,6 +58,24 @@ const queries = {
             timestamp: new Date()
         }).save()
     },
+    registerCourtAssistant: async function (userInfo) {
+        return await new CourtStaff({
+            password: bcrypt.hashSync(userInfo.password, 10),
+            username: userInfo.username,
+            court_station:userInfo.court_station,
+            role:'assistant',
+            timestamp: new Date()
+        }).save()
+    },
+    registerDeputyRegistrar: async function (userInfo) {
+        return await new CourtStaff({
+            password: bcrypt.hashSync(userInfo.password, 10),
+            username: userInfo.username,
+            court_station:userInfo.court_station,
+            role:'registrar',
+            timestamp: new Date()
+        }).save()
+    },
     signup: async function (userInfo) {
         return await new Admin({
             password: bcrypt.hashSync(userInfo.password, 10),
@@ -135,6 +153,13 @@ const queries = {
     isCourtAdminExists: async function (args) {
         return await CourtStaff.findOne({court_station: args.court_station,role:'court-admin'}).exec()
     },
+    isCourtAssistantExists: async function (args) {
+        return await CourtStaff.findOne({court_station: args.court_station,role:'assistant'}).exec()
+    },
+    isDeputyRegistrarExists: async function (args) {
+        return await CourtStaff.findOne({court_station: args.court_station,role:'registrar'}).exec()
+    }
+    ,
     courtStations: async function () {
         return await CourtStation.find({}).sort({timestamp: -1}).exec()
     },
@@ -150,6 +175,9 @@ const queries = {
     },
     caseCategories: async function () {
         return await CaseCategory.find({}).sort({timestamp: -1}).exec()
+    },
+    getCourtAssistant: async function (args) {
+        return await CourtStaff.findOne({court_station:args,role:'assistant'}).exec()
     },
     findCourtStation: async function (id) {
         return await CourtStation.findById(id).exec()
