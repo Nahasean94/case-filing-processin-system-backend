@@ -179,6 +179,9 @@ const queries = {
     getCourtAssistant: async function (args) {
         return await CourtStaff.findOne({court_station:args,role:'assistant'}).exec()
     },
+    getDeputyRegistrar: async function (args) {
+        return await CourtStaff.findOne({court_station:args,role:'registrar'}).exec()
+    },
     findCourtStation: async function (id) {
         return await CourtStation.findById(id).exec()
     },

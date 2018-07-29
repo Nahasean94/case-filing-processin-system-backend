@@ -296,6 +296,15 @@ const RootQuery = new GraphQLObjectType({
                 return queries.getCourtAssistant(args.court_station)
             }
         },
+        getDeputyRegistrar: {
+            type: CourtStaffSchema,
+            args: {
+                court_station: {type: GraphQLID},
+            },
+            resolve(parent, args) {
+                return queries.getDeputyRegistrar(args.court_station)
+            }
+        },
 
         confirmPassword: {
             type: PasswordType,
