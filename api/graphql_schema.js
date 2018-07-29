@@ -62,6 +62,20 @@ const AdminType = new GraphQLObjectType({
         timestamp: {type: GraphQLString},
     })
 })
+const CourtStaffSchema = new GraphQLObjectType({
+    name: 'CourtStaff',
+    fields: () => ({
+        id: {type: GraphQLID},
+        username: {type: GraphQLString},
+        role: {type: GraphQLString},
+        court_station: {type: CourtStationType,
+       async resolve(parent){
+            return await queries.findCourtStation(parent.court_station)
+        }
+        },
+        timestamp: {type: GraphQLString},
+    })
+})
 const AdvocateType = new GraphQLObjectType({
     name: 'Advocate',
     fields: () => ({
@@ -161,8 +175,22 @@ const RootQuery = new GraphQLObjectType({
             type: ExistsType,
             args:{name:{type:GraphQLString}},
             resolve(parent, args) {
-                return queries.isCourtStationExists(args).then(location => {
-                    if (location.length > 0) {
+                return queries.isCourtStationExists(args).then(court_station => {
+                    if (court_station.length > 0) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
+            }
+        },
+        isCourtAdminExists: {
+            type: ExistsType,
+            args:{court_station:{type:GraphQLID}},
+            resolve(parent, args) {
+                return queries.isCourtAdminExists(args).then(court_station => {
+                    if (court_station) {
                         return {exists: true}
                     }
                     return {
@@ -188,8 +216,8 @@ const RootQuery = new GraphQLObjectType({
             type: ExistsType,
             args:{name:{type:GraphQLString}},
             resolve(parent, args) {
-                return queries.isFormFeeStructureExists(args).then(location => {
-                    if (location.length > 0) {
+                return queries.isFormFeeStructureExists(args).then(court_station => {
+                    if (court_station.length > 0) {
                         return {exists: true}
                     }
                     return {
@@ -202,8 +230,8 @@ const RootQuery = new GraphQLObjectType({
             type: ExistsType,
             args:{name:{type:GraphQLString}},
             resolve(parent, args) {
-                return queries.isCaseCategoryExists(args).then(location => {
-                    if (location.length > 0) {
+                return queries.isCaseCategoryExists(args).then(court_station => {
+                    if (court_station.length > 0) {
                         return {exists: true}
                     }
                     return {
@@ -212,6 +240,18 @@ const RootQuery = new GraphQLObjectType({
                 })
             }
         },
+        isAdvocateExists: {
+            type: ExistsType,
+            args: {
+                practice_number: {type: GraphQLInt},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.isAdvocateExists(args).then(person => {
+                    return {exists: !!person}
+                })
+            }
+        },
+
         caseCategories: {
             type:new GraphQLList(CaseCategoryType),
             resolve(parent, args) {
@@ -267,15 +307,15 @@ const Mutation = new GraphQLObjectType({
 
             }
         },
-        isAdvocateExists: {
-            type: ExistsType,
+        courtAdminLogin: {
+            type: TokenType,
             args: {
-                practice_number: {type: GraphQLInt},
+                username: {type: GraphQLString},
+                password: {type: GraphQLString},
+                court_station: {type: GraphQLID}
             },
             async resolve(parent, args, ctx) {
-                return await queries.isAdvocateExists(args).then(person => {
-                    return {exists: !!person}
-                })
+                return await authentication.courtAdminLogin(args)
             }
         },
 
@@ -288,6 +328,17 @@ const Mutation = new GraphQLObjectType({
             },
             async resolve(parent, args, ctx) {
                 return await queries.registerAdmin(args)
+            }
+        },
+        registerCourtAdmin: {
+            type: CourtStaffSchema,
+            args: {
+                username: {type: GraphQLString},
+                password: {type: GraphQLString},
+                court_station: {type: GraphQLID},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.registerCourtAdmin(args)
             }
         },
         registerAdvocate: {

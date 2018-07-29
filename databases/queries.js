@@ -49,6 +49,15 @@ const queries = {
             timestamp: new Date()
         }).save()
     },
+    registerCourtAdmin: async function (userInfo) {
+        return await new CourtStaff({
+            password: bcrypt.hashSync(userInfo.password, 10),
+            username: userInfo.username,
+            court_station:userInfo.court_station,
+            role:'court-admin',
+            timestamp: new Date()
+        }).save()
+    },
     signup: async function (userInfo) {
         return await new Admin({
             password: bcrypt.hashSync(userInfo.password, 10),
@@ -81,9 +90,9 @@ const queries = {
         }, {new: true}).exec()
 
     },
-    addCourtStation: async function (location) {
+    addCourtStation: async function (court_station) {
         return await new CourtStation({
-            name: location.name,
+            name: court_station.name,
             timestamp: new Date()
         }).save()
     },
@@ -99,13 +108,13 @@ const queries = {
             fee: category.fee,
         }).save()
     },
-    adminExists: async function (location) {
+    adminExists: async function (court_station) {
         return await Admin.find({}).exec()
     },
 
-    updateLocation: async function (location) {
-        return await Location.findByIdAndUpdate(location.id, {
-            name: location.name,
+    updateLocation: async function (court_station) {
+        return await Location.findByIdAndUpdate(court_station.id, {
+            name: court_station.name,
         }).exec()
     },
     getPassword: async function (guard) {
@@ -122,6 +131,10 @@ const queries = {
     isCourtStationExists: async function (args) {
         return await CourtStation.find({name: args.name}).exec()
     },
+
+    isCourtAdminExists: async function (args) {
+        return await CourtStaff.findOne({court_station: args.court_station,role:'court-admin'}).exec()
+    },
     courtStations: async function () {
         return await CourtStation.find({}).sort({timestamp: -1}).exec()
     },
@@ -137,6 +150,9 @@ const queries = {
     },
     caseCategories: async function () {
         return await CaseCategory.find({}).sort({timestamp: -1}).exec()
+    },
+    findCourtStation: async function (id) {
+        return await CourtStation.findById(id).exec()
     },
 }
 module.exports = queries

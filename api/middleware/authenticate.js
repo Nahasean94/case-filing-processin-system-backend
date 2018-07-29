@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const config = require('../config')
-const {Advocate,Admin} = require('../../databases/schemas')
+const {Advocate,Admin,CourtStaff} = require('../../databases/schemas')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
@@ -89,6 +89,41 @@ module.exports = {
                 ok: false,
                 token: null,
                 error: 'No user with such credentials exists. Please check your practice number and password and try again.'
+            }
+        }).catch(function (err) {
+            return {
+                ok: false,
+                token: null,
+                error: err
+            }
+        })
+    },
+    courtAdminLogin: async (args) => {
+        const {username, password,court_station} = args
+        return await CourtStaff.findOne({username: username,court_station:court_station}).select('username password court_station').exec().then(function (person) {
+            if (person) {
+                if (bcrypt.compareSync(password, person.password)) {
+                    return {
+                        ok: true,
+                        token: jwt.sign({
+                            id: person._id,
+                            username: person.username,
+                            court_station:person.court_station,
+                            role:'court-admin',
+                        }, config.jwtSecret),
+                        error: null
+                    }
+                }
+                return {
+                    ok: false,
+                    token: null,
+                    error: 'No user with such credentials exists. Please check your username, court station and password and try again.'
+                }
+            }
+            return {
+                ok: false,
+                token: null,
+                error: 'No user with such credentials exists. Please check your username, court station and password and try again.'
             }
         }).catch(function (err) {
             return {

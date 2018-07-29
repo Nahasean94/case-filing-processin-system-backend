@@ -128,11 +128,15 @@ const CourtStaffSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['assistant', 'registrar'],
+        enum: ['assistant', 'registrar','court-admin'],
         required: [true, 'Password is a required field']
     },
     timestamp: Date,
 
+    court_station:{
+        type:Schema.Types.ObjectId,
+        ref:'CourtStation'
+    }
 })
 const AdminSchema = new Schema({
     username: {
