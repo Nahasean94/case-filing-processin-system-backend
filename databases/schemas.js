@@ -190,32 +190,25 @@ const TransactionsSchema = new Schema({
     },
     timestamp: Date,
 })
-const FeeStructureSchema = new Schema({
-    form_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Form'
-    },
+const FormFeeStructureSchema = new Schema({
     name: {
         type: String,
         required: [true, "name is a required field"]
     },
-    amount: {
+    fee: {
         type: Number,
         required: [true, "amount is a required field"]
     },
 })
 const FormSchema = new Schema({
+    type_of_form: {
+        type: Schema.Types.ObjectId,
+        ref: 'FormFeeStructure'
+    },
     points: [{
         type: String,
     }],
-    signature: {
-        type: String,
-        required: [true, "signature is a required field"]
-    },
-    amount: {
-        type: Number,
-        required: [true, "amount is a required field"]
-    },
+
     timestamp: Date,
 })
 
@@ -234,7 +227,7 @@ const CaseCategory = mongoose.model('CaseCategory', CaseCategorySchema)
 const Verdict = mongoose.model('Verdict', VerdictSchema)
 const Transactions = mongoose.model('Transactions', TransactionsSchema)
 const Admin = mongoose.model('Admin', AdminSchema)
-const FeeStructure = mongoose.model('FeeStructure', FeeStructureSchema)
+const FormFeeStructure = mongoose.model('FormFeeStructure', FormFeeStructureSchema)
 const Form = mongoose.model('Form', FormSchema)
 
 //export the above models to used in other files
@@ -248,7 +241,7 @@ module.exports = {
     CaseCategory,
     Verdict,
     Transactions,
-    FeeStructure,
+    FormFeeStructure,
     Form,
     Admin
 }

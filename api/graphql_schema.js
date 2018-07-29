@@ -96,58 +96,21 @@ const CaseCategoryType= new GraphQLObjectType({
     })
 })
 
+const FormFeeStructureSchema= new GraphQLObjectType({
+    name: 'FormFeeStructure',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        fee: {type: GraphQLInt},
+    })
+})
+
 const PasswordType = new GraphQLObjectType({
     name: 'Password',
     fields: () => ({
         confirmed: {
             type: GraphQLBoolean,
         },
-    })
-})
-
-const MessageReplies = new GraphQLObjectType({
-    name: 'MessageReplies',
-    fields: () => ({
-        id: {type: GraphQLID},
-        author: {
-            type: AuthorType,
-            async resolve(parent, args) {
-                if (parent.author.account === 'guard') {
-                    return await queries.findAdvocateByAdvocateId(parent.author.id).then(guard => {
-                        return {
-                            username: `${guard.first_name} ${guard.last_name}`,
-                            profile_picture: guard.profile_picture
-                        }
-                    })
-                } else if (parent.author.account === 'admin') {
-                    return {
-                        username: 'Administrator',
-                        profile_picture: 'default.jpg'
-                    }
-                }
-            }
-        },
-        body: {type: GraphQLString},
-        timestamp: {type: GraphQLString},
-    })
-})
-const AuthorType = new GraphQLObjectType({
-    name: 'Author',
-    fields: () => ({
-        username: {type: GraphQLString},
-        profile_picture: {
-            type: GraphQLString,
-        },
-    })
-})
-const AttendanceRegister = new GraphQLObjectType({
-    name: 'Comment',
-    fields: () => ({
-        id: {type: GraphQLID},
-        practice_number: {type: GraphQLInt},
-        signin: {type: GraphQLString},
-        signout: {type: GraphQLString},
-        date: {type: GraphQLString},
     })
 })
 const TokenType = new GraphQLObjectType({
@@ -215,6 +178,26 @@ const RootQuery = new GraphQLObjectType({
             }
         },
 
+        formFeeStructures: {
+            type:new GraphQLList(FormFeeStructureSchema),
+            resolve(parent, args) {
+                return queries.formFeeStructures()
+            }
+        },
+        isFormFeeStructureExists: {
+            type: ExistsType,
+            args:{name:{type:GraphQLString}},
+            resolve(parent, args) {
+                return queries.isFormFeeStructureExists(args).then(location => {
+                    if (location.length > 0) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
+            }
+        },
  isCaseCategoryExists: {
             type: ExistsType,
             args:{name:{type:GraphQLString}},
@@ -368,8 +351,17 @@ const Mutation = new GraphQLObjectType({
                 name: {type: GraphQLString},
             },
             async resolve(parent, args, ctx) {
-                console.log(args)
                 return await queries.addCaseCategory(args)
+            }
+        },
+        addFormFeeStructure: {
+            type: FormFeeStructureSchema,
+            args: {
+                name: {type: GraphQLString},
+                fee: {type: GraphQLInt},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.addFormFeeStructure(args)
             }
         },
         updateCourtStation: {
