@@ -9,7 +9,7 @@ const {Advocate,
     Organization,
     CourtStaff,
     CourtStation,
-    CaseStation,
+    CaseCategory,
     Verdict,
     Admin,
     Transactions,
@@ -95,6 +95,12 @@ const queries = {
     addCourtStation: async function (location) {
         return await new CourtStation({
             name: location.name,
+            timestamp: new Date()
+        }).save()
+    },
+    addCaseCategory: async function (category) {
+        return await new CaseCategory({
+            name: category.name,
             timestamp: new Date()
         }).save()
     },
@@ -250,8 +256,14 @@ const queries = {
     isCourtStationExists: async function (args) {
         return await CourtStation.find({name: args.name}).exec()
     },
-    courtStations: async function (args) {
-        return await CourtStation.find({}).exec()
+    courtStations: async function () {
+        return await CourtStation.find({}).sort({timestamp:-1}).exec()
+    },
+    isCaseCategoryExists: async function (args) {
+        return await CaseCategory.find({name: args.name}).exec()
+    },
+    caseCategories: async function () {
+        return await CaseCategory.find({}).sort({timestamp:-1}).exec()
     },
 }
 module.exports = queries

@@ -87,32 +87,15 @@ const CourtStationType = new GraphQLObjectType({
         timestamp: {type: GraphQLString},
     })
 })
-const SalaryType = new GraphQLObjectType({
-    name: 'Salary',
+const CaseCategoryType= new GraphQLObjectType({
+    name: 'CaseCategory',
     fields: () => ({
         id: {type: GraphQLID},
-        practice_number: {type: GraphQLInt},
-        contract: {type: GraphQLString},
-        deductions: {type: new GraphQLList(DeductionsType)},
-        transactions: {type: new GraphQLList(TransactionsType)},
-        gross_salary: {type: GraphQLInt},
-    })
-})
-const DeductionsType = new GraphQLObjectType({
-    name: 'Deductions',
-    fields: () => ({
         name: {type: GraphQLString},
-        amount: {type: GraphQLInt},
-    })
-})
-const TransactionsType = new GraphQLObjectType({
-    name: 'Transactions',
-    fields: () => ({
         timestamp: {type: GraphQLString},
-        amount: {type: GraphQLInt},
-        text: {type: GraphQLInt},
     })
 })
+
 const PasswordType = new GraphQLObjectType({
     name: 'Password',
     fields: () => ({
@@ -121,52 +104,7 @@ const PasswordType = new GraphQLObjectType({
         },
     })
 })
-const MessageType = new GraphQLObjectType({
-    name: 'Message',
-    fields: () => ({
-        id: {type: GraphQLID},
-        author: {
-            type: AuthorType,
-            async resolve(parent, args) {
-                if (parent.author.account === 'guard') {
-                    return await queries.findAdvocateByAdvocateId(parent.author.id).then(guard => {
-                        return {
-                            username: `${guard.first_name} ${guard.last_name}`,
-                            profile_picture: guard.profile_picture
-                        }
-                    })
-                } else if (parent.author.account === 'admin') {
-                    return {
-                        username: 'Administrator',
-                        profile_picture: 'default.jpg'
-                    }
-                }
-            }
-        },
-        body: {type: GraphQLString},
-        replies: {
-            type: new GraphQLList(MessageReplies)
-        },
-        timestamp: {type: GraphQLString},
-        approved: {type: GraphQLBoolean},
-        message_type: {type: GraphQLString},
-        title: {type: GraphQLString}
-    })
-})
-// const ReportType = new GraphQLObjectType({
-//     name: 'Report',
-//     fields: () => ({
-//         id: {type: GraphQLID},
-//         practice_number: {
-//             type: AdvocateType,
-//             async resolve(parent, args) {
-//                 return await queries.findAdvocateByAdvocateId(parent.practice_number)
-//             }
-//         },
-//         report: {type: GraphQLString},
-//         timestamp: {type: GraphQLString},
-//     })
-// })
+
 const MessageReplies = new GraphQLObjectType({
     name: 'MessageReplies',
     fields: () => ({
@@ -274,6 +212,27 @@ const RootQuery = new GraphQLObjectType({
             type:new GraphQLList(CourtStationType),
             resolve(parent, args) {
                 return queries.courtStations()
+            }
+        },
+
+ isCaseCategoryExists: {
+            type: ExistsType,
+            args:{name:{type:GraphQLString}},
+            resolve(parent, args) {
+                return queries.isCaseCategoryExists(args).then(location => {
+                    if (location.length > 0) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
+            }
+        },
+        caseCategories: {
+            type:new GraphQLList(CaseCategoryType),
+            resolve(parent, args) {
+                return queries.caseCategories()
             }
         },
 
@@ -403,6 +362,16 @@ const Mutation = new GraphQLObjectType({
                 return await queries.addCourtStation(args)
             }
         },
+        addCaseCategory: {
+            type: CaseCategoryType,
+            args: {
+                name: {type: GraphQLString},
+            },
+            async resolve(parent, args, ctx) {
+                console.log(args)
+                return await queries.addCaseCategory(args)
+            }
+        },
         updateCourtStation: {
             type: CourtStationType,
             args: {
@@ -425,66 +394,7 @@ const Mutation = new GraphQLObjectType({
             }
 
         },
-        signin: {
-            type: AttendanceRegister,
-            args: {
-                practice_number: {type: GraphQLInt},
-                signin: {type: GraphQLString},
-                date: {type: GraphQLString},
-            },
-            async resolve(parent, args, ctx) {
-                return await queries.signin(args)
-            }
 
-        },
-        signout: {
-            type: AttendanceRegister,
-            args: {
-                practice_number: {type: GraphQLInt},
-                signout: {type: GraphQLString},
-                date: {type: GraphQLString},
-            },
-            async resolve(parent, args, ctx) {
-                return await queries.signout(args)
-            }
-        },
-        newMessage: {
-            type: MessageType,
-            args: {
-                author: {type: GraphQLString},
-                body: {type: GraphQLString},
-                account_type: {type: GraphQLString},
-                message_type: {type: GraphQLString},
-            },
-            async resolve(parent, args, ctx) {
-                return await queries.newMessage(args)
-            }
-        },
-        newCustomMessage: {
-            type: MessageType,
-            args: {
-                author: {type: GraphQLString},
-                body: {type: GraphQLString},
-                account_type: {type: GraphQLString},
-                message_type: {type: GraphQLString},
-                title: {type: GraphQLString},
-            },
-            async resolve(parent, args, ctx) {
-                return await queries.newCustomMessage(args)
-            }
-        },
-        newMessageReply: {
-            type: MessageReplies,
-            args: {
-                message: {type: GraphQLID},
-                author: {type: GraphQLString},
-                account: {type: GraphQLString},
-                body: {type: GraphQLString},
-            },
-            async resolve(parent, args, ctx) {
-                return await queries.newMessageReply(args)
-            }
-        },
         changePassword: {
             type: PasswordType,
             args: {

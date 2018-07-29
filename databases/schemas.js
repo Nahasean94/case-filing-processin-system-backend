@@ -150,14 +150,16 @@ const CourtStationSchema = new Schema({
     name: {
         type: String,
         unique: [true, "name already exists"],
+        required: [true, "name field is required"],
     },
     timestamp: Date,
 
 })
-const CaseStationSchema = new Schema({
-    location: {
+const CaseCategorySchema = new Schema({
+    name: {
         type: String,
-        unique: [true, "location already exists"],
+        unique: [true, "name already exists"],
+        required: [true, "name field is required"],
     },
     timestamp: Date,
 
@@ -228,7 +230,7 @@ const Individual = mongoose.model('Individual', IndividualSchema)
 const Organization = mongoose.model('Organization', OrganizationSchema)
 const CourtStaff = mongoose.model('CourtStaff', CourtStaffSchema)
 const CourtStation = mongoose.model('CourtStation', CourtStationSchema)
-const CaseStation = mongoose.model('CaseStation', CaseStationSchema)
+const CaseCategory = mongoose.model('CaseCategory', CaseCategorySchema)
 const Verdict = mongoose.model('Verdict', VerdictSchema)
 const Transactions = mongoose.model('Transactions', TransactionsSchema)
 const Admin = mongoose.model('Admin', AdminSchema)
@@ -243,7 +245,7 @@ module.exports = {
     Organization,
     CourtStaff,
     CourtStation,
-    CaseStation,
+    CaseCategory,
     Verdict,
     Transactions,
     FeeStructure,
