@@ -173,6 +173,9 @@ const queries = {
     isCaseCategoryExists: async function (args) {
         return await CaseCategory.find({name: args.name}).exec()
     },
+    isAdvocateExists: async function (args) {
+        return await Advocate.findOne({practice_number: args.practice_number}).exec()
+    },
     caseCategories: async function () {
         return await CaseCategory.find({}).sort({timestamp: -1}).exec()
     },

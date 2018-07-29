@@ -377,7 +377,7 @@ const Mutation = new GraphQLObjectType({
                 return await authentication.deputyRegistrarLogin(args)
             }
         },
-        isCourtAssistantLogin: {
+        courtAssistantLogin: {
             type: TokenType,
             args: {
                 username: {type: GraphQLString},
