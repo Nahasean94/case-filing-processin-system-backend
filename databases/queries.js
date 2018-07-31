@@ -14,6 +14,7 @@ const {
     Verdict,
     Admin,
     Transactions,
+    CaseType,
     FormFeeStructure,
     Form,
 } = require('./schemas')//import various models
@@ -120,6 +121,12 @@ const queries = {
             timestamp: new Date()
         }).save()
     },
+    addCaseType: async function (category) {
+        return await new CaseType({
+            name: category.name,
+            timestamp: new Date()
+        }).save()
+    },
     addFormFeeStructure: async function (category) {
         return await new FormFeeStructure({
             name: category.name,
@@ -173,11 +180,17 @@ const queries = {
     isCaseCategoryExists: async function (args) {
         return await CaseCategory.find({name: args.name}).exec()
     },
+    isCaseTypeExists: async function (args) {
+        return await CaseType.find({name: args.name}).exec()
+    },
     isAdvocateExists: async function (args) {
         return await Advocate.findOne({practice_number: args.practice_number}).exec()
     },
     caseCategories: async function () {
         return await CaseCategory.find({}).sort({timestamp: -1}).exec()
+    },
+    caseTypes: async function () {
+        return await CaseType.find({}).sort({timestamp: -1}).exec()
     },
     getCourtAssistant: async function (args) {
         return await CourtStaff.findOne({court_station:args,role:'assistant'}).exec()

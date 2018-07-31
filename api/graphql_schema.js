@@ -110,6 +110,14 @@ const CaseCategoryType = new GraphQLObjectType({
         timestamp: {type: GraphQLString},
     })
 })
+const CaseType = new GraphQLObjectType({
+    name: 'CaseType',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
 
 const FormFeeStructureSchema = new GraphQLObjectType({
     name: 'FormFeeStructure',
@@ -269,6 +277,20 @@ const RootQuery = new GraphQLObjectType({
                 })
             }
         },
+        isCaseTypeExists: {
+            type: ExistsType,
+            args: {name: {type: GraphQLString}},
+            resolve(parent, args) {
+                return queries.isCaseTypeExists(args).then(case_type => {
+                    if (case_type.length > 0) {
+                        return {exists: true}
+                    }
+                    return {
+                        exists: false
+                    }
+                })
+            }
+        },
         isAdvocateExists: {
             type: ExistsType,
             args: {
@@ -282,9 +304,15 @@ const RootQuery = new GraphQLObjectType({
         },
 
         caseCategories: {
-            type: new GraphQLList(CaseCategoryType),
+            type: new GraphQLList(CaseType),
             resolve(parent, args) {
                 return queries.caseCategories()
+            }
+        },
+        caseTypes: {
+            type: new GraphQLList(CaseCategoryType),
+            resolve(parent, args) {
+                return queries.caseTypes()
             }
         },
         getCourtAssistant: {
@@ -495,6 +523,15 @@ const Mutation = new GraphQLObjectType({
             },
             async resolve(parent, args, ctx) {
                 return await queries.addCaseCategory(args)
+            }
+        },
+        addCaseType: {
+            type: CaseType,
+            args: {
+                name: {type: GraphQLString},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.addCaseType(args)
             }
         },
         addFormFeeStructure: {

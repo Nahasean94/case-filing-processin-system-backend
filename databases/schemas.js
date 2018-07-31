@@ -24,6 +24,7 @@ const Schema = mongoose.Schema
 const CaseSchema = new Schema({
     title: String,
     description: String,
+
     parties: {
         party_type: {
             type: String,
@@ -168,6 +169,15 @@ const CaseCategorySchema = new Schema({
     timestamp: Date,
 
 })
+const CaseTypeSchema = new Schema({
+    name: {
+        type: String,
+        unique: [true, "name already exists"],
+        required: [true, "name field is required"],
+    },
+    timestamp: Date,
+
+})
 const VerdictSchema = new Schema({
     case_id: {
         type: Schema.Types.ObjectId,
@@ -233,6 +243,7 @@ const Transactions = mongoose.model('Transactions', TransactionsSchema)
 const Admin = mongoose.model('Admin', AdminSchema)
 const FormFeeStructure = mongoose.model('FormFeeStructure', FormFeeStructureSchema)
 const Form = mongoose.model('Form', FormSchema)
+const CaseType = mongoose.model('CaseType', CaseTypeSchema)
 
 //export the above models to used in other files
 module.exports = {
@@ -247,5 +258,6 @@ module.exports = {
     Transactions,
     FormFeeStructure,
     Form,
-    Admin
+    Admin,
+    CaseType
 }
