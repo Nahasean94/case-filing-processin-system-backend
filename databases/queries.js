@@ -54,8 +54,8 @@ const queries = {
         return await new CourtStaff({
             password: bcrypt.hashSync(userInfo.password, 10),
             username: userInfo.username,
-            court_station:userInfo.court_station,
-            role:'court-admin',
+            court_station: userInfo.court_station,
+            role: 'court-admin',
             timestamp: new Date()
         }).save()
     },
@@ -63,8 +63,8 @@ const queries = {
         return await new CourtStaff({
             password: bcrypt.hashSync(userInfo.password, 10),
             username: userInfo.username,
-            court_station:userInfo.court_station,
-            role:'assistant',
+            court_station: userInfo.court_station,
+            role: 'assistant',
             timestamp: new Date()
         }).save()
     },
@@ -72,8 +72,8 @@ const queries = {
         return await new CourtStaff({
             password: bcrypt.hashSync(userInfo.password, 10),
             username: userInfo.username,
-            court_station:userInfo.court_station,
-            role:'registrar',
+            court_station: userInfo.court_station,
+            role: 'registrar',
             timestamp: new Date()
         }).save()
     },
@@ -158,13 +158,13 @@ const queries = {
     },
 
     isCourtAdminExists: async function (args) {
-        return await CourtStaff.findOne({court_station: args.court_station,role:'court-admin'}).exec()
+        return await CourtStaff.findOne({court_station: args.court_station, role: 'court-admin'}).exec()
     },
     isCourtAssistantExists: async function (args) {
-        return await CourtStaff.findOne({court_station: args.court_station,role:'assistant'}).exec()
+        return await CourtStaff.findOne({court_station: args.court_station, role: 'assistant'}).exec()
     },
     isDeputyRegistrarExists: async function (args) {
-        return await CourtStaff.findOne({court_station: args.court_station,role:'registrar'}).exec()
+        return await CourtStaff.findOne({court_station: args.court_station, role: 'registrar'}).exec()
     }
     ,
     courtStations: async function () {
@@ -186,20 +186,107 @@ const queries = {
     isAdvocateExists: async function (args) {
         return await Advocate.findOne({practice_number: args.practice_number}).exec()
     },
-    caseCategories: async function () {
+    newCaseCategories: async function () {
         return await CaseCategory.find({}).sort({timestamp: -1}).exec()
     },
-    caseTypes: async function () {
+    newCaseTypes: async function () {
         return await CaseType.find({}).sort({timestamp: -1}).exec()
     },
     getCourtAssistant: async function (args) {
-        return await CourtStaff.findOne({court_station:args,role:'assistant'}).exec()
+        return await CourtStaff.findOne({court_station: args, role: 'assistant'}).exec()
     },
     getDeputyRegistrar: async function (args) {
-        return await CourtStaff.findOne({court_station:args,role:'registrar'}).exec()
+        return await CourtStaff.findOne({court_station: args, role: 'registrar'}).exec()
     },
     findCourtStation: async function (id) {
         return await CourtStation.findById(id).exec()
     },
+    findAdmin: async function (id) {
+        return await Admin.findById(id).exec()
+    },
+    caseCategories: async function () {
+        return await CaseCategory.find().exec()
+    },
+    caseTypes: async function () {
+        return await CaseType.find().exec()
+    },
+
+    findAdvocate: async function (id) {
+        return await Advocate.findById(id).exec()
+    },
+    findCase: async function (id) {
+        return await Case.findById(id).exec()
+    },
+    findIndividual: async function (id) {
+        return await Individual.findById(id).exec()
+    },
+    findOrganization: async function (id) {
+        return await Organization.findById(id).exec()
+    },
+    findCourtStaff: async function (id) {
+        return await CourtStaff.findById(id).exec()
+    },
+    findCaseCategory: async function (id) {
+        return await CaseCategory.findById(id).exec()
+    },
+    findVerdict: async function (id) {
+        return await Verdict.findById(id).exec()
+    },
+    findTransactions: async function (id) {
+        return await Transactions.findById(id).exec()
+    },
+    findFormFeeStructure: async function (id) {
+        return await FormFeeStructure.findById(id).exec()
+    },
+    findForm: async function (id) {
+        return await Form.findById(id).exec()
+    },
+    findCaseType: async function (id) {
+        return await CaseType.findById(id).exec()
+    },
+    addNewForm: async function (form) {
+        return await new Form({type_of_form: form.type_of_form, facts: form.facts, timestamp: new Date()}).save()
+    },
+    makePayment: async function (payment) {
+        return await new Transactions({fee: payment, timestamp: new Date()}).save()
+    },
+    addOrganization: async function (organization) {
+        return await new Organization({
+            email: organization.email,
+            name: organization.name,
+            cellphone: organization.cellphone
+        }).save()
+    },
+    addIndividual: async function (individual) {
+        return await new Individual({
+            email: individual.email,
+            name: individual.name,
+            cellphone: individual.cellphone,
+            gender: individual.gender,
+            dob: individual.dob,
+            timestamp: new Date()
+        }).save()
+    },
+    addCase: async function (newCase) {
+        return await new Case({
+            title: newCase.title,
+            description: newCase.description,
+            court_station: newCase.court_station,
+            case_type: newCase.case_type,
+            case_category: newCase.case_category,
+            "defendant.party_type": newCase.defendant_party_type,
+            "defendant.name": newCase.defendant_name,
+            "defendant.email": newCase.defendant_email,
+            "defendant.cellphone": newCase.defendant_cellphone,
+            plaintiff: newCase.plaintiff,
+            plaintiff_type: newCase.plaintiff_type,
+            form: newCase.form,
+            payment: newCase.payment,
+            timestamp: new Date()
+        }).save()
+    },
+
+
 }
+
 module.exports = queries

@@ -102,6 +102,14 @@ const CourtStationType = new GraphQLObjectType({
         timestamp: {type: GraphQLString},
     })
 })
+const CaseTypeType = new GraphQLObjectType({
+    name: 'CaseType',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
 const CaseCategoryType = new GraphQLObjectType({
     name: 'CaseCategory',
     fields: () => ({
@@ -110,8 +118,147 @@ const CaseCategoryType = new GraphQLObjectType({
         timestamp: {type: GraphQLString},
     })
 })
+const CombinedPlaintiffType = new GraphQLObjectType({
+    name: 'CombinedPlaintiff',
+    fields: () => ({
+        id: {type: GraphQLID},
+        email: {type: GraphQLString},
+        gender: {type: GraphQLString},
+        cellphone: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+        dob: {type: GraphQLString},
+    })
+})
+const PlaintiffType = new GraphQLObjectType({
+    name: 'Plaintiff',
+    fields: () => ({
+        party_type: {
+            type: GraphQLString
+        },
+        party_id: {
+            type: CombinedPlaintiffType,
+            async resolve(parent) {
+                if (parent.party_type === 'individual') {
+                    return await queries.findIndividual(parent.party_id)
+                }
+                return await queries.findOrganization(parent.party_id)
+            }
+
+        },
+    })
+})
+const DefendantType = new GraphQLObjectType({
+    name: 'Defendant',
+    fields: () => ({
+        party_type: {type: GraphQLString},
+        name: {type: GraphQLString},
+        email: {type: GraphQLString},
+        cellphone: {type: GraphQLString}
+
+    })
+})
+
 const CaseType = new GraphQLObjectType({
-    name: 'CaseType',
+    name: 'Case',
+    fields: () => ({
+        id: {type: GraphQLID},
+        title: {type: GraphQLString},
+        description: {type: GraphQLString},
+        plaintiff: {type: PlaintiffType},
+        defendant: {type: DefendantType},
+        court_station: {
+            type: CourtStationType,
+            async resolve(parent) {
+                return await queries.findCourtStation(parent.court_station)
+            }
+        },
+        case_type: {
+            type: CaseTypeType,
+            async resolve(parent) {
+                return await queries.findCaseType(parent.case_type)
+            }
+        },
+        case_category: {
+            type: CaseCategoryType,
+            async resolve(parent) {
+                return await queries.findCaseCategory(parent.case_category)
+            }
+        },
+        form: {
+            type: FormType,
+            async resolve(parent) {
+                return await queries.findForm(parent.form)
+            }
+        },
+        payment: {
+            type: TransactionsType,
+            async resolve(parent) {
+                return await queries.findTransactions(parent.payment)
+            }
+        },
+        judge: {type: GraphQLString},
+        verdict: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const IndividualType = new GraphQLObjectType({
+    name: 'Individual',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const OrganizationType = new GraphQLObjectType({
+    name: 'Organization',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const IndividualDefendantType = new GraphQLObjectType({
+    name: 'IndividualDefendant',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const OrganizationDefendantType = new GraphQLObjectType({
+    name: 'OrganizationDefendant',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const VerdictType = new GraphQLObjectType({
+    name: 'Verdict',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const TransactionsType = new GraphQLObjectType({
+    name: 'Transactions',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const FormFeeStructureType = new GraphQLObjectType({
+    name: 'FormFeeStructure',
+    fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        timestamp: {type: GraphQLString},
+    })
+})
+const FormType = new GraphQLObjectType({
+    name: 'Form',
     fields: () => ({
         id: {type: GraphQLID},
         name: {type: GraphQLString},
@@ -304,7 +451,7 @@ const RootQuery = new GraphQLObjectType({
         },
 
         caseCategories: {
-            type: new GraphQLList(CaseType),
+            type: new GraphQLList(CaseTypeType),
             resolve(parent, args) {
                 return queries.caseCategories()
             }
@@ -586,6 +733,71 @@ const Mutation = new GraphQLObjectType({
                 })
             }
         },
+        addNewForm: {
+            type: FormType,
+            args: {
+                type_of_form: {type: GraphQLID},
+                facts: {type: new GraphQLList(GraphQLString)}
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.addNewForm(args)
+            }
+        },
+        addOrganization: {
+            type: OrganizationType,
+            args: {
+                name: {type: GraphQLString},
+                email: {type: GraphQLString},
+                cellphone: {type: GraphQLLong},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.addNewForm(args)
+            }
+        },
+        addIndividual: {
+            type: IndividualType,
+            args: {
+                name: {type: GraphQLString},
+                email: {type: GraphQLString},
+                cellphone: {type: GraphQLLong},
+                gender: {type: GraphQLString},
+                dob: {type: GraphQLString},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.addIndividual(args)
+            }
+        },
+        makePayment: {
+            type: TransactionsType,
+            args: {
+                fee: {type: GraphQLInt},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.makePayment(args.fee)
+            }
+        },
+        addNewCase: {
+            type: CaseType,
+            args: {
+                title: {type: GraphQLString},
+                description: {type: GraphQLString},
+                court_station: {type: GraphQLID},
+                case_type: {type: GraphQLID},
+                case_category: {type: GraphQLID},
+                defendant_party_type: {type: GraphQLString},
+                defendant_name: {type: GraphQLString},
+                defendant_email: {type: GraphQLString},
+                defendant_cellphone: {type: GraphQLLong},
+                plaintiff: {type: GraphQLID},
+                plaintiff_type: {type: GraphQLString},
+                form: {type: GraphQLID},
+                payment: {type: GraphQLID},
+            },
+            async resolve(parent, args, ctx) {
+                return await queries.addCase(args)
+            }
+        },
+
     },
 
 })

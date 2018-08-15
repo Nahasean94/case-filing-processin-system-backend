@@ -25,7 +25,7 @@ const CaseSchema = new Schema({
     title: String,
     description: String,
 
-    parties: {
+    plaintiff: {
         party_type: {
             type: String,
             enum: ['individual', 'organization']
@@ -33,9 +33,38 @@ const CaseSchema = new Schema({
         party_id: String
 
     },
+    defendant: {
+        party_type: {
+            type: String,
+            enum: ['individual', 'organization']
+        },
+        name: String,
+        email: String,
+        cellphone: String
+
+    },
+    court_station: {
+        type: Schema.Types.ObjectId,
+        ref: 'CourtStation'
+    },
+    case_type: {
+        type: Schema.Types.ObjectId,
+        ref: 'CaseType'
+    },
+    case_category: {
+        type: Schema.Types.ObjectId,
+        ref: 'CaseCategory'
+    },
+    form: {
+        type: Schema.Types.ObjectId,
+        ref: 'Form'
+    },
+    payment: {
+        type: Schema.Types.ObjectId,
+        ref: 'Transactions'
+    },
     judge: String,
     verdict: String,
-    payment: String,
     timestamp: Date,
 })
 const AdvocateSchema = new Schema({
@@ -72,51 +101,38 @@ const AdvocateSchema = new Schema({
     timestamp: Date,
 })
 const IndividualSchema = new Schema({
-    party_level: String,
-    case_party_type: String,
-    names: {
-        type: String,
-        required:
-            [true, 'names is a required field']
-    },
-    email: {
-        type: String,
-        required:
-            [true, 'email is a required field']
-    },
-    gender: {
-        type: String,
-        required:
-            [true, 'gender is a required field']
-    },
-    profile_picture: String,
-
-    cellphone: Number,
-    timestamp: Date,
-})
-const OrganizationSchema = new Schema({
-    party_level: String,
-    case_party_type: String,
     name: {
         type: String,
         required:
-            [true, 'names is a required field']
+            [true, 'name is a required field']
     },
     email: {
         type: String,
         required:
             [true, 'email is a required field']
     },
-
     gender: {
         type: String,
         required:
             [true, 'gender is a required field']
     },
     cellphone: Number,
-    location: String,
     timestamp: Date,
-    postal_address: String,
+    dob: Date,
+})
+const OrganizationSchema = new Schema({
+    name: {
+        type: String,
+        required:
+            [true, 'name is a required field']
+    },
+    email: {
+        type: String,
+        required:
+            [true, 'email is a required field']
+    },
+    cellphone: Number,
+    timestamp: Date,
 })
 const CourtStaffSchema = new Schema({
     username: {
@@ -129,14 +145,14 @@ const CourtStaffSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['assistant', 'registrar','court-admin'],
+        enum: ['assistant', 'registrar', 'court-admin'],
         required: [true, 'Password is a required field']
     },
     timestamp: Date,
 
-    court_station:{
-        type:Schema.Types.ObjectId,
-        ref:'CourtStation'
+    court_station: {
+        type: Schema.Types.ObjectId,
+        ref: 'CourtStation'
     }
 })
 const AdminSchema = new Schema({
@@ -194,13 +210,9 @@ const VerdictSchema = new Schema({
     timestamp: Date,
 })
 const TransactionsSchema = new Schema({
-    case_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Case'
-    },
     fee: {
         type: Number,
-        required: [true, "what time did the guard sign in?"]
+        required: [true, "How much was paid?"]
     },
     timestamp: Date,
 })
@@ -219,7 +231,7 @@ const FormSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'FormFeeStructure'
     },
-    points: [{
+    facts: [{
         type: String,
     }],
 
