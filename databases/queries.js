@@ -267,6 +267,16 @@ const queries = {
             timestamp: new Date()
         }).save()
     },
+    findPendingCases: async function (advocate) {
+        return await Case.find({
+            advocate: advocate
+        }).sort({timestamp:-1}).exec()
+    },
+    findCourtPendingCases: async function (court_station) {
+        return await Case.find({
+            court_station: court_station
+        }).sort({timestamp:-1}).exec()
+    },
     addCase: async function (newCase, advocate) {
         const prefix = (await Case.find({}).exec()).length + 1
 

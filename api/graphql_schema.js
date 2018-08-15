@@ -157,7 +157,13 @@ const DefendantType = new GraphQLObjectType({
 
     })
 })
-
+const CaseNumberType = new GraphQLObjectType({
+    name: 'CaseNumber',
+    fields: () => ({
+        prefix: {type: GraphQLInt},
+        suffix: {type: GraphQLInt},
+    })
+})
 const CaseType = new GraphQLObjectType({
     name: 'Case',
     fields: () => ({
@@ -166,6 +172,7 @@ const CaseType = new GraphQLObjectType({
         description: {type: GraphQLString},
         plaintiff: {type: PlaintiffType},
         defendant: {type: DefendantType},
+        case_number: {type: CaseNumberType},
         court_station: {
             type: CourtStationType,
             async resolve(parent) {
@@ -199,6 +206,12 @@ const CaseType = new GraphQLObjectType({
         judge: {type: GraphQLString},
         verdict: {type: GraphQLString},
         timestamp: {type: GraphQLString},
+        advocate: {
+            type: AdvocateType,
+            async resolve(parent) {
+                return await queries.findAdvocate(parent.advocate)
+            }
+        },
     })
 })
 const IndividualType = new GraphQLObjectType({
@@ -314,6 +327,20 @@ const RootQuery = new GraphQLObjectType({
                 return queries.findUser({id: args.id})
             }
         },
+        findPendingCases: {
+            type: new GraphQLList(CaseType),
+            args: {advocate: {type: GraphQLID}},
+            resolve(parent, args) {
+                return queries.findPendingCases(args.advocate)
+            }
+        },
+        findCourtPendingCases: {
+            type: new GraphQLList(CaseType),
+            args: {court_station: {type: GraphQLID}},
+            resolve(parent, args) {
+                return queries.findCourtPendingCases(args.court_station)
+            }
+        },
         adminExists: {
             type: ExistsType,
             resolve(parent, args) {
@@ -389,7 +416,6 @@ const RootQuery = new GraphQLObjectType({
                 return queries.courtStations()
             }
         },
-
         formFeeStructures: {
             type: new GraphQLList(FormFeeStructureSchema),
             resolve(parent, args) {
@@ -449,7 +475,6 @@ const RootQuery = new GraphQLObjectType({
                 })
             }
         },
-
         caseCategories: {
             type: new GraphQLList(CaseTypeType),
             resolve(parent, args) {
@@ -480,7 +505,6 @@ const RootQuery = new GraphQLObjectType({
                 return queries.getDeputyRegistrar(args.court_station)
             }
         },
-
         confirmPassword: {
             type: PasswordType,
             args: {
@@ -794,8 +818,8 @@ const Mutation = new GraphQLObjectType({
                 payment: {type: GraphQLID},
             },
             async resolve(parent, args, ctx) {
-                const {id}=await authentication.authenticate(ctx)
-                return await queries.addCase(args,id)
+                const {id} = await authentication.authenticate(ctx)
+                return await queries.addCase(args, id)
             }
         },
 
