@@ -267,7 +267,9 @@ const queries = {
             timestamp: new Date()
         }).save()
     },
-    addCase: async function (newCase) {
+    addCase: async function (newCase, advocate) {
+        const prefix = (await Case.find({}).exec()).length + 1
+
         return await new Case({
             title: newCase.title,
             description: newCase.description,
@@ -282,11 +284,24 @@ const queries = {
             plaintiff_type: newCase.plaintiff_type,
             form: newCase.form,
             payment: newCase.payment,
-            timestamp: new Date()
+            timestamp: new Date(),
+            advocate: advocate,
+            "case_number.prefix": prefix,
+            "case_number.suffix": this.getSuffix(),
         }).save()
     },
+    getSuffix: function () {
+        const year = new Date().getFullYear().toString()
+
+        const arr = []
+        for (let i = 0; i < year.length; i++) {
+            arr.push(year.charAt(i))
+        }
+        return `${arr[2]}${arr[3]}`
+    }
 
 
 }
+// console.log(Case.estimateDocumentCount())
 
 module.exports = queries

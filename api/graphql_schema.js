@@ -794,7 +794,8 @@ const Mutation = new GraphQLObjectType({
                 payment: {type: GraphQLID},
             },
             async resolve(parent, args, ctx) {
-                return await queries.addCase(args)
+                const {id}=await authentication.authenticate(ctx)
+                return await queries.addCase(args,id)
             }
         },
 

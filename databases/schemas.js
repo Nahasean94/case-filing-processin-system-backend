@@ -24,6 +24,10 @@ const Schema = mongoose.Schema
 const CaseSchema = new Schema({
     title: String,
     description: String,
+    case_number:{
+        prefix: Number,
+        suffix:Number,
+    },
 
     plaintiff: {
         party_type: {
@@ -66,6 +70,11 @@ const CaseSchema = new Schema({
     judge: String,
     verdict: String,
     timestamp: Date,
+    registrar_approval:Boolean,
+    advocate:{
+        type: Schema.Types.ObjectId,
+        ref: 'Advocate'
+    }
 })
 const AdvocateSchema = new Schema({
     practice_number: Number,
