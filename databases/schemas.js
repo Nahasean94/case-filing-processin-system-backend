@@ -70,10 +70,18 @@ const CaseSchema = new Schema({
     judge: String,
     verdict: String,
     timestamp: Date,
-    registrar_approval:Boolean,
+    registrar_approval:{
+        type:Boolean,
+        default:false,
+    },
     advocate:{
         type: Schema.Types.ObjectId,
         ref: 'Advocate'
+    },
+    hearing:{
+        date:String,
+        time:String,
+
     }
 })
 const AdvocateSchema = new Schema({
@@ -204,10 +212,6 @@ const CaseTypeSchema = new Schema({
 
 })
 const VerdictSchema = new Schema({
-    case_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Case'
-    },
     ruling: {
         type: String,
         required: [true, "ruling is a required field"]

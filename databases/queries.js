@@ -270,12 +270,15 @@ const queries = {
     findPendingCases: async function (advocate) {
         return await Case.find({
             advocate: advocate
-        }).sort({timestamp:-1}).exec()
+        }).sort({timestamp: -1}).exec()
     },
     findCourtPendingCases: async function (court_station) {
         return await Case.find({
             court_station: court_station
-        }).sort({timestamp:-1}).exec()
+        }).sort({timestamp: -1}).exec()
+    },
+    findCaseInfo: async function (id) {
+        return await Case.findById(id).exec()
     },
     addCase: async function (newCase, advocate) {
         const prefix = (await Case.find({}).exec()).length + 1
@@ -290,8 +293,8 @@ const queries = {
             "defendant.name": newCase.defendant_name,
             "defendant.email": newCase.defendant_email,
             "defendant.cellphone": newCase.defendant_cellphone,
-            plaintiff: newCase.plaintiff,
-            plaintiff_type: newCase.plaintiff_type,
+            "plaintiff.party_id": newCase.plaintiff,
+            "plaintiff.party_type": newCase.plaintiff_type,
             form: newCase.form,
             payment: newCase.payment,
             timestamp: new Date(),

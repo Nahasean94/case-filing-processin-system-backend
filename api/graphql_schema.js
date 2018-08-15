@@ -123,6 +123,7 @@ const CombinedPlaintiffType = new GraphQLObjectType({
     fields: () => ({
         id: {type: GraphQLID},
         email: {type: GraphQLString},
+        name: {type: GraphQLString},
         gender: {type: GraphQLString},
         cellphone: {type: GraphQLString},
         timestamp: {type: GraphQLString},
@@ -204,8 +205,9 @@ const CaseType = new GraphQLObjectType({
             }
         },
         judge: {type: GraphQLString},
-        verdict: {type: GraphQLString},
+        verdict: {type: VerdictType},
         timestamp: {type: GraphQLString},
+        registrar_approval:{type :GraphQLBoolean},
         advocate: {
             type: AdvocateType,
             async resolve(parent) {
@@ -250,7 +252,8 @@ const VerdictType = new GraphQLObjectType({
     name: 'Verdict',
     fields: () => ({
         id: {type: GraphQLID},
-        name: {type: GraphQLString},
+        ruling: {type: GraphQLString},
+        date: {type: GraphQLString},
         timestamp: {type: GraphQLString},
     })
 })
@@ -258,7 +261,7 @@ const TransactionsType = new GraphQLObjectType({
     name: 'Transactions',
     fields: () => ({
         id: {type: GraphQLID},
-        name: {type: GraphQLString},
+        fee: {type: GraphQLInt},
         timestamp: {type: GraphQLString},
     })
 })
@@ -339,6 +342,13 @@ const RootQuery = new GraphQLObjectType({
             args: {court_station: {type: GraphQLID}},
             resolve(parent, args) {
                 return queries.findCourtPendingCases(args.court_station)
+            }
+        },
+        findCaseInfo: {
+            type: CaseType,
+            args: {id: {type: GraphQLID}},
+            resolve(parent, args) {
+                return queries.findCaseInfo(args.id)
             }
         },
         adminExists: {
@@ -564,7 +574,6 @@ const Mutation = new GraphQLObjectType({
                 return await authentication.courtAdminLogin(args)
             }
         },
-
         deputyRegistrarLogin: {
             type: TokenType,
             args: {
@@ -587,8 +596,6 @@ const Mutation = new GraphQLObjectType({
                 return await authentication.courtAssistantLogin(args)
             }
         },
-
-
         registerAdmin: {
             type: AdminType,
             args: {
@@ -725,7 +732,6 @@ const Mutation = new GraphQLObjectType({
                 return await queries.updateCourtStation(args)
             }
         },
-
         uploadProfilePicture: {
             type: AdvocateType,
             args: {
@@ -737,7 +743,6 @@ const Mutation = new GraphQLObjectType({
             }
 
         },
-
         changePassword: {
             type: PasswordType,
             args: {
@@ -775,7 +780,7 @@ const Mutation = new GraphQLObjectType({
                 cellphone: {type: GraphQLLong},
             },
             async resolve(parent, args, ctx) {
-                return await queries.addNewForm(args)
+                return await queries.addOrganization(args)
             }
         },
         addIndividual: {
