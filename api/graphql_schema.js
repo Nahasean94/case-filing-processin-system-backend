@@ -16,8 +16,8 @@ const shortid = require('shortid')//will help us name each upload uniquely
 const jsmediatags = require('jsmediatags')
 
 //Store the upload
-const storeFS = ({stream, filename}, id, uploader) => {
-    const uploadDir = `./public/uploads/${uploader}`
+const storeFS = ({stream, filename}, id) => {
+    const uploadDir = `./public/uploads`
 
 // Ensure upload directory exists
     mkdirp.sync(uploadDir)
@@ -37,12 +37,12 @@ const storeFS = ({stream, filename}, id, uploader) => {
     )
 }
 //process the upload and also store the path in the database
-const processUpload = async (upload, profile, uploader) => {
+const processUpload = async (upload, type_of_form, ) => {
     const id = shortid.generate()
-    const {stream, filename,} = await upload.file
-    const path = `${uploader}/${id}-${filename}`
-    return await storeFS({stream, filename}, id, uploader).then(() =>
-        queries.storeUpload(path, upload.caption, uploader))
+    const {stream, filename,} = await upload
+    const path = `${id}-${filename}`
+    return await storeFS({stream, filename}, id).then(() =>
+        queries.addNewForm(type_of_form, path))
 }
 //process the profile picture
 const processProfilePicture = async (upload, uploader) => {
@@ -207,7 +207,7 @@ const CaseType = new GraphQLObjectType({
         judge: {type: GraphQLString},
         verdict: {type: VerdictType},
         timestamp: {type: GraphQLString},
-        registrar_approval:{type :GraphQLBoolean},
+        registrar_approval: {type: GraphQLBoolean},
         advocate: {
             type: AdvocateType,
             async resolve(parent) {
@@ -270,26 +270,18 @@ const FormFeeStructureType = new GraphQLObjectType({
     fields: () => ({
         id: {type: GraphQLID},
         name: {type: GraphQLString},
-        timestamp: {type: GraphQLString},
+        fee: {type: GraphQLString},
     })
 })
 const FormType = new GraphQLObjectType({
     name: 'Form',
     fields: () => ({
         id: {type: GraphQLID},
-        name: {type: GraphQLString},
-        timestamp: {type: GraphQLString},
+        type_of_form: {type: GraphQLString},
+        path: {type: GraphQLString},
     })
 })
 
-const FormFeeStructureSchema = new GraphQLObjectType({
-    name: 'FormFeeStructure',
-    fields: () => ({
-        id: {type: GraphQLID},
-        name: {type: GraphQLString},
-        fee: {type: GraphQLInt},
-    })
-})
 
 const PasswordType = new GraphQLObjectType({
     name: 'Password',
@@ -335,6 +327,12 @@ const RootQuery = new GraphQLObjectType({
             args: {advocate: {type: GraphQLID}},
             resolve(parent, args) {
                 return queries.findPendingCases(args.advocate)
+            }
+        },
+        findCaseForms: {
+            type: new GraphQLList(FormFeeStructureType),
+            resolve(parent, args) {
+                return queries.findCaseForms()
             }
         },
         findCourtPendingCases: {
@@ -427,7 +425,7 @@ const RootQuery = new GraphQLObjectType({
             }
         },
         formFeeStructures: {
-            type: new GraphQLList(FormFeeStructureSchema),
+            type: new GraphQLList(FormFeeStructureType),
             resolve(parent, args) {
                 return queries.formFeeStructures()
             }
@@ -713,7 +711,7 @@ const Mutation = new GraphQLObjectType({
             }
         },
         addFormFeeStructure: {
-            type: FormFeeStructureSchema,
+            type: FormFeeStructureType,
             args: {
                 name: {type: GraphQLString},
                 fee: {type: GraphQLInt},
@@ -766,10 +764,10 @@ const Mutation = new GraphQLObjectType({
             type: FormType,
             args: {
                 type_of_form: {type: GraphQLID},
-                facts: {type: new GraphQLList(GraphQLString)}
+                file: {type: GraphQLUpload}
             },
             async resolve(parent, args, ctx) {
-                return await queries.addNewForm(args)
+                return await processUpload(args.file,args.type_of_form)
             }
         },
         addOrganization: {

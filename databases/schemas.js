@@ -24,9 +24,9 @@ const Schema = mongoose.Schema
 const CaseSchema = new Schema({
     title: String,
     description: String,
-    case_number:{
+    case_number: {
         prefix: Number,
-        suffix:Number,
+        suffix: Number,
     },
 
     plaintiff: {
@@ -70,17 +70,17 @@ const CaseSchema = new Schema({
     judge: String,
     verdict: String,
     timestamp: Date,
-    registrar_approval:{
-        type:Boolean,
-        default:false,
+    registrar_approval: {
+        type: Boolean,
+        default: false,
     },
-    advocate:{
+    advocate: {
         type: Schema.Types.ObjectId,
         ref: 'Advocate'
     },
-    hearing:{
-        date:String,
-        time:String,
+    hearing: {
+        date: String,
+        time: String,
 
     }
 })
@@ -244,11 +244,10 @@ const FormSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'FormFeeStructure'
     },
-    facts: [{
+    path: {
         type: String,
-    }],
-
-    timestamp: Date,
+        required: [true, "amount is a required field"],
+    },
 })
 
 

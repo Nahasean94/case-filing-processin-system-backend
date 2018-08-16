@@ -244,8 +244,8 @@ const queries = {
     findCaseType: async function (id) {
         return await CaseType.findById(id).exec()
     },
-    addNewForm: async function (form) {
-        return await new Form({type_of_form: form.type_of_form, facts: form.facts, timestamp: new Date()}).save()
+    addNewForm: async function (type_of_form,path) {
+        return await new Form({type_of_form: type_of_form, path: path}).save()
     },
     makePayment: async function (payment) {
         return await new Transactions({fee: payment, timestamp: new Date()}).save()
@@ -271,6 +271,10 @@ const queries = {
         return await Case.find({
             advocate: advocate
         }).sort({timestamp: -1}).exec()
+    },
+    findCaseForms: async function () {
+        return await FormFeeStructure.find({
+        }).exec()
     },
     findCourtPendingCases: async function (court_station) {
         return await Case.find({
