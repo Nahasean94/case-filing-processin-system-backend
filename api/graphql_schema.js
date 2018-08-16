@@ -277,7 +277,10 @@ const FormType = new GraphQLObjectType({
     name: 'Form',
     fields: () => ({
         id: {type: GraphQLID},
-        type_of_form: {type: GraphQLString},
+        type_of_form: {type: FormFeeStructureType,
+        async resolve(parent){
+            return await  queries.findFormFeeStructure(parent.type_of_form)
+        }},
         path: {type: GraphQLString},
     })
 })
@@ -333,6 +336,14 @@ const RootQuery = new GraphQLObjectType({
             type: new GraphQLList(FormFeeStructureType),
             resolve(parent, args) {
                 return queries.findCaseForms()
+            }
+        },
+        findServedCases: {
+            type: CaseType,
+            args:{prefix:{type:GraphQLInt}},
+            resolve(parent, args,ctx) {
+                const {id}=authentication.authenticate(ctx)
+                return queries.findServedCases(id,args.prefix)
             }
         },
         findCourtPendingCases: {
@@ -702,7 +713,7 @@ const Mutation = new GraphQLObjectType({
             }
         },
         addCaseType: {
-            type: CaseType,
+            type: CaseTypeType,
             args: {
                 name: {type: GraphQLString},
             },

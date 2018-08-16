@@ -34,7 +34,10 @@ const CaseSchema = new Schema({
             type: String,
             enum: ['individual', 'organization']
         },
-        party_id: String
+        party_id: String,
+        messages:[{
+            Boolean
+        }]
 
     },
     defendant: {
@@ -44,8 +47,8 @@ const CaseSchema = new Schema({
         },
         name: String,
         email: String,
-        cellphone: String
-
+        cellphone: String,
+        contacted:Boolean
     },
     court_station: {
         type: Schema.Types.ObjectId,
