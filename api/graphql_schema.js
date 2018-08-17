@@ -13,7 +13,9 @@ const authentication = require('./middleware/authenticate')//this module helps u
 const fs = require('fs')//this will help us create and manipulate the file system
 const mkdirp = require('mkdirp')//will help use create new folders
 const shortid = require('shortid')//will help us name each upload uniquely
-const jsmediatags = require('jsmediatags')
+
+var request = require('sync-request')
+const btoa = require('btoa')
 
 //Store the upload
 const storeFS = ({stream, filename}, id) => {
@@ -37,7 +39,7 @@ const storeFS = ({stream, filename}, id) => {
     )
 }
 //process the upload and also store the path in the database
-const processUpload = async (upload, type_of_form, ) => {
+const processUpload = async (upload, type_of_form,) => {
     const id = shortid.generate()
     const {stream, filename,} = await upload
     const path = `${id}-${filename}`
@@ -148,13 +150,26 @@ const PlaintiffType = new GraphQLObjectType({
         },
     })
 })
+const ServeType=new GraphQLObjectType({
+    name: 'Serve',
+    fields: () => ({
+        text: {
+            type: GraphQLString
+        },
+        timestamp:  {
+            type: GraphQLString
+        },
+    })
+})
 const DefendantType = new GraphQLObjectType({
     name: 'Defendant',
     fields: () => ({
         party_type: {type: GraphQLString},
         name: {type: GraphQLString},
         email: {type: GraphQLString},
-        cellphone: {type: GraphQLString}
+        cellphone: {type: GraphQLString},
+        serve:{type:ServeType}
+
 
     })
 })
@@ -214,6 +229,8 @@ const CaseType = new GraphQLObjectType({
                 return await queries.findAdvocate(parent.advocate)
             }
         },
+        hearing: {
+            type: HearingType        },
     })
 })
 const IndividualType = new GraphQLObjectType({
@@ -257,6 +274,14 @@ const VerdictType = new GraphQLObjectType({
         timestamp: {type: GraphQLString},
     })
 })
+const HearingType = new GraphQLObjectType({
+    name: 'Hearing',
+    fields: () => ({
+        text: {type: GraphQLID},
+        date: {type: GraphQLString},
+        judge: {type: GraphQLString},
+    })
+})
 const TransactionsType = new GraphQLObjectType({
     name: 'Transactions',
     fields: () => ({
@@ -277,11 +302,37 @@ const FormType = new GraphQLObjectType({
     name: 'Form',
     fields: () => ({
         id: {type: GraphQLID},
-        type_of_form: {type: FormFeeStructureType,
-        async resolve(parent){
-            return await  queries.findFormFeeStructure(parent.type_of_form)
-        }},
+        type_of_form: {
+            type: FormFeeStructureType,
+            async resolve(parent) {
+                return await queries.findFormFeeStructure(parent.type_of_form)
+            }
+        },
         path: {type: GraphQLString},
+    })
+})
+const MpesaType = new GraphQLObjectType({
+    name: 'Mpesa',
+    fields: () => ({
+        MerchantRequestID: {type: GraphQLString},
+        CheckoutRequestID: {type: GraphQLString},
+        ResponseCode: {type: GraphQLString},
+        ResponseDescription: {type: GraphQLString},
+        CustomerMessage: {type: GraphQLString},
+    })
+})
+const PaymentType = new GraphQLObjectType({
+    name: 'Payment',
+    fields: () => ({
+        payment_id: {type: GraphQLString},
+        merchant_id: {type: GraphQLString},
+        phone_no: {type: GraphQLString},
+        amount_paid: {type: GraphQLString},
+        result_code: {type: GraphQLString},
+        result_description: {type: GraphQLString},
+        mpesa_refno: {type: GraphQLString},
+        transaction_date: {type: GraphQLString},
+        checkout_id: {type: GraphQLString},
     })
 })
 
@@ -340,10 +391,10 @@ const RootQuery = new GraphQLObjectType({
         },
         findServedCases: {
             type: CaseType,
-            args:{prefix:{type:GraphQLInt}},
-            resolve(parent, args,ctx) {
-                const {id}=authentication.authenticate(ctx)
-                return queries.findServedCases(id,args.prefix)
+            args: {prefix: {type: GraphQLInt}},
+            resolve(parent, args, ctx) {
+                const {id} = authentication.authenticate(ctx)
+                return queries.findServedCases(id, args.prefix)
             }
         },
         findCourtPendingCases: {
@@ -543,6 +594,72 @@ const RootQuery = new GraphQLObjectType({
                 })
             }
         },
+        makeMpesaPayment: {
+            type: MpesaType,
+            args: {phone_number: {type: GraphQLLong}},
+            resolve(parent, args, ctx) {
+
+let res
+                function pad2(n) {
+                    return n < 10 ? '0' + n : n
+                }
+
+                var date = new Date()
+
+                const timestamp = date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2(date.getDate()) + pad2(date.getHours()) + pad2(date.getMinutes()) + pad2(date.getSeconds())
+
+                const password = btoa(174379 + "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919" + timestamp)
+
+
+                const auth = "Bearer WbfhDAP3G6MBQrrPgMYCUSFOGsJB"
+
+
+                const url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+
+                 const pay=request('POST',url,
+                    {
+                        headers: {
+                            "Authorization": auth
+                        },
+                        json: {
+                            "BusinessShortCode": "174379",
+                            "Password": password,
+                            "Timestamp": timestamp,
+                            "TransactionType": "CustomerPayBillOnline",
+                            "Amount": "1",
+                            "PartyA": "600342",
+                            "PartyB": "174379",
+                            "PhoneNumber": args.phone_number,
+                            "CallBackURL": "https://classmite.com/mpesa_response.php",
+                            "AccountReference": "CaseFiling",
+                            "TransactionDesc": "This transaction is to pay for forms for ejudiciary"
+                        }
+                    },
+
+                )
+                return JSON.parse(pay.getBody('utf8'))
+
+
+
+            }
+
+        },
+        confirmPayment: {
+            type: PaymentType,
+            args: {checkout_id: {type: GraphQLString}},
+          async  resolve(parent, args, ctx) {
+                const url = "https://classmite.com/confirm_payment.php"
+              const pay=request('POST',url,
+                  {
+                        json: {
+                            "checkout_id": args.checkout_id
+                        }
+                    }
+                )
+              return JSON.parse(pay.getBody('utf8'))
+
+         }
+        }
     }
 })
 const Mutation = new GraphQLObjectType({
@@ -778,7 +895,7 @@ const Mutation = new GraphQLObjectType({
                 file: {type: GraphQLUpload}
             },
             async resolve(parent, args, ctx) {
-                return await processUpload(args.file,args.type_of_form)
+                return await processUpload(args.file, args.type_of_form)
             }
         },
         addOrganization: {

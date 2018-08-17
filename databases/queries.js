@@ -275,10 +275,10 @@ const queries = {
     findCaseForms: async function () {
         return await FormFeeStructure.find({}).exec()
     },
-    findServedCases: async function (id,prefix) {
+    findServedCases: async function (id, prefix) {
         return await Case.findOne({
             advocate: {$ne: id},
-            "case_number.prefix":prefix
+            "case_number.prefix": prefix
         }).exec()
     },
     findCourtPendingCases: async function (court_station) {
@@ -290,7 +290,7 @@ const queries = {
         return await Case.findById(id).exec()
     },
     addCase: async function (newCase, advocate) {
-        const prefix = (await Case.find({}).exec()).length + 1
+        const prefix = (await Case.find({}).sort({timestamp: -1}).limit(1).exec().case_number.prefix) + 1
 
         return await new Case({
             title: newCase.title,

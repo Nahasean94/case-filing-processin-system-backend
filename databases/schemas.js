@@ -35,9 +35,7 @@ const CaseSchema = new Schema({
             enum: ['individual', 'organization']
         },
         party_id: String,
-        messages:[{
-            Boolean
-        }]
+
 
     },
     defendant: {
@@ -48,7 +46,10 @@ const CaseSchema = new Schema({
         name: String,
         email: String,
         cellphone: String,
-        contacted:Boolean
+        serve:{
+            text:String,
+            timestamp:Date
+        },
     },
     court_station: {
         type: Schema.Types.ObjectId,
@@ -82,8 +83,10 @@ const CaseSchema = new Schema({
         ref: 'Advocate'
     },
     hearing: {
-        date: String,
-        time: String,
+        text:String,
+        judge: String,
+    },
+    status:{
 
     }
 })
