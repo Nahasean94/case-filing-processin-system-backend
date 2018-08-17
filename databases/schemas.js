@@ -46,7 +46,7 @@ const CaseSchema = new Schema({
         name: String,
         email: String,
         cellphone: String,
-        serve:{
+        served:{
             text:String,
             timestamp:Date
         },
@@ -83,7 +83,7 @@ const CaseSchema = new Schema({
         ref: 'Advocate'
     },
     hearing: {
-        text:String,
+        date:String,
         judge: String,
     },
     status:{

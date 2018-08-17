@@ -168,7 +168,7 @@ const DefendantType = new GraphQLObjectType({
         name: {type: GraphQLString},
         email: {type: GraphQLString},
         cellphone: {type: GraphQLString},
-        serve:{type:ServeType}
+        served:{type:ServeType}
 
 
     })
@@ -659,7 +659,8 @@ let res
               return JSON.parse(pay.getBody('utf8'))
 
          }
-        }
+        },
+
     }
 })
 const Mutation = new GraphQLObjectType({
@@ -953,6 +954,29 @@ const Mutation = new GraphQLObjectType({
                 return await queries.addCase(args, id)
             }
         },
+        serveDefendant: {
+            type: CaseType,
+            args: {
+                id: {type: GraphQLID},
+                message: {type: GraphQLString}
+            },
+            async  resolve(parent, args, ctx) {
+                return queries.serveDefendant(args.id,args.message)
+
+            }
+        },
+        addHearingInfo: {
+            type: CaseType,
+            args: {
+                id: {type: GraphQLID},
+                date: {type: GraphQLString},
+                judge: {type: GraphQLString}
+            },
+            async  resolve(parent, args, ctx) {
+                return queries.addHearingInfo(args)
+
+            }
+        }
 
     },
 

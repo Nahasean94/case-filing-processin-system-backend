@@ -320,6 +320,32 @@ const queries = {
             arr.push(year.charAt(i))
         }
         return `${arr[2]}${arr[3]}`
+    },
+    serveDefendant: async function (id, message) {
+        const accountSid = 'AC7eea5ad0c0793fd647c6d7a596740fbc'
+        const authToken = '055e40e06dda72b7d70b343f0fb0d133\n'
+        const client = require('twilio')(accountSid, authToken)
+
+        client.messages
+            .create({
+                body: message,
+                from: '+14159095176',
+                to: '+254705031577'
+            })
+            .then(message => console.log(message.sid)).catch(err => {
+            console.log(err)
+            console.log("Could not send the message. Check you network connection")
+        })
+        return await Case.findByIdAndUpdate(id, {
+            "defendant.served.text": message,
+            "defendant.served.timestamp": new Date()
+        }, {new: true}).exec()
+    },
+    addHearingInfo: async function (args) {
+        return await Case.findByIdAndUpdate(args.id, {
+            "hearing.judge": args.judge,
+            "hearing.date": args.date,
+        }, {new: true}).exec()
     }
 
 
